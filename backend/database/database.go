@@ -21,7 +21,7 @@ func Connect(path string) (*Database, error) {
 	}
 
 	createTableSQL := `
-		CREATE TABLE time_entries (
+		CREATE TABLE IF NOT EXISTS time_entries (
 			id INTEGER PRIMARY KEY,
 			pay_period_id INTEGER,
 			entry_date DATE NOT NULL,
@@ -34,7 +34,7 @@ func Connect(path string) (*Database, error) {
 			meeting_flag BOOLEAN DEFAULT FALSE,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
-    `
+	`
 
 	_, err = db.Exec(createTableSQL)
 	if err != nil {
