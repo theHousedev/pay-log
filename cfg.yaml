@@ -1,0 +1,5 @@
+site:
+  tag: pay
+  name: Pay Log
+  description: Webapp to log and track pilot pay
+  git_repo: http://github.com/theHousedev/pay-log
