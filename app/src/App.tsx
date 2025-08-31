@@ -46,16 +46,10 @@ function App() {
     remaining: 1.8
   })
 
-  // Calculate remaining flight hours for past 24 hours
   useEffect(() => {
-    // TODO: This would query the database for flight hours in the past 24 hours
-    // For now, using mock data
     const calculateRemaining = () => {
-      // const currentDate = new Date(formData.date + 'T' + formData.time)
-      // const twentyFourHoursAgo = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000)
-
-      // Mock calculation - in real app, this would sum flight hours from database
-      const past24Hours = 6.2 // Mock value from database
+      // TODO: pull past 24hrs from backend
+      const past24Hours = 6.2
       const remaining = Math.max(0, 8.0 - past24Hours)
 
       setCurrentCheck(prev => ({
@@ -70,7 +64,7 @@ function App() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     console.log('Entry submitted: ', formData)
-    // TODO: Send to backend API
+    // TODO: interact with backend
   }
 
   const handleChange = (field: keyof EntryForm, value: string | number) => {
@@ -78,7 +72,6 @@ function App() {
   }
 
   const handleNumberChange = (field: keyof EntryForm, value: string) => {
-    // Convert empty string to null, otherwise parse as number
     const numValue = value === '' ? null : parseFloat(value)
     setFormData(prev => ({ ...prev, [field]: numValue }))
   }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,36 +10,79 @@ import (
 	"github.com/theHousedev/pay-log/backend/database"
 )
 
-func main() {
-	fmt.Println("Starting pay-log database server...")
-
+func getPort() string {
 	port := os.Getenv("SITE_BACKEND_PORT")
 	if port == "" {
-		port = "5000"
+		log.Fatal("ERR: SITE_BACKEND_PORT missing, check config")
 	}
+	return port
+}
 
-	db, err := database.Connect("./pay_log.db")
+func openDB(dbPath string) *database.Database {
+	fmt.Println("Starting pay-log database server...")
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		db, err := database.Connect(dbPath)
+		if err != nil {
+			log.Fatal("Failed to create database: ", err)
+		}
+		fmt.Println("New database created at '", dbPath, "'")
+		return db
+	}
+	db, err := database.Connect(dbPath)
 	if err != nil {
-		log.Fatal("Failed to create database: ", err)
+		log.Fatal("", err)
 	}
-	defer database.Close(db)
 	fmt.Println("Database initialized.")
+	return db
+}
 
-	// CORS setup
+func toJSON(w http.ResponseWriter, response database.Response) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func main() {
+	dbPath := "./pay_log.db"
+	port := getPort()
+
+	db := openDB(dbPath)
+	defer db.Close()
+
 	allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
 	if allowedOrigin == "" {
-		log.Println("WARNING: ALLOWED_ORIGIN not set; defaulting to * for dev only")
+		log.Println("WARNING: ALLOWED_ORIGIN not set; defaulting to *")
 		allowedOrigin = "*"
 	}
 
-	// Health endpoint
-	http.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+	health := "/api/health"
+	new := "/api/new-entry"
+	edit := "/api/edit-entry"
+	delete := "/api/delete-entry"
+
+	http.HandleFunc(health, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"status": "OK", "message": "Pay logging server is running"}`)
+		response := db.GetHealth()
+		toJSON(w, response)
 	})
 
-	// Start server
+	http.HandleFunc(new, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
+		response := db.NewEntry()
+		toJSON(w, response)
+	})
+
+	http.HandleFunc(edit, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
+		response := db.EditEntry()
+		toJSON(w, response)
+	})
+
+	http.HandleFunc(delete, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
+		response := db.DeleteEntry()
+		toJSON(w, response)
+	})
+
 	log.Printf("Starting server on 127.0.0.1:%s", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf("127.0.0.1:%s", port), nil))
 }

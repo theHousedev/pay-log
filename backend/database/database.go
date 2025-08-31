@@ -3,51 +3,94 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type Database struct {
-	db *sql.DB
+	*sql.DB
+}
+
+type Response struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Data    any    `json:"data,omitempty"`
 }
 
 func Connect(path string) (*Database, error) {
-	db, err := sql.Open("sqlite3", path)
+	sqlDB, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, fmt.Errorf("error opening database: %w", err)
 	}
-	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+
+	db := &Database{sqlDB}
+
+	if err := db.createTables(); err != nil {
+		return nil, err
 	}
 
-	createTableSQL := `
-		CREATE TABLE IF NOT EXISTS time_entries (
-			id INTEGER PRIMARY KEY,
-			pay_period_id INTEGER,
-			entry_date DATE NOT NULL,
-			entry_time TIME, -- for timestamp tracking
-			entry_type TEXT NOT NULL, -- 'flight', 'ground', 'admin', 'misc'
-			hours DECIMAL(4,2) NOT NULL,
-			customer_name TEXT,
-			notes TEXT,
-			ride_flag BOOLEAN DEFAULT FALSE,
-			meeting_flag BOOLEAN DEFAULT FALSE,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		);
-	`
-
-	_, err = db.Exec(createTableSQL)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to create pay entries table: %w", err)
+	response := db.GetHealth()
+	if response.Status != "OK" {
+		return nil, fmt.Errorf("database init failed: %s", response.Message)
 	}
-
-	return &Database{db: db}, nil
+	return db, nil
 }
 
-func Close(db *Database) error {
-	err := db.db.Close()
+func (db *Database) createTables() error {
+	schema, err := os.ReadFile("database/schema.sql")
+
 	if err != nil {
-		return fmt.Errorf("Error closing database: %w", err)
+		return fmt.Errorf("schema read failed [%w]", err)
+	}
+
+	_, err = db.Exec(string(schema))
+
+	if err != nil {
+		return fmt.Errorf("table creation failed [%w]", err)
+	}
+
+	return nil
+}
+
+func (db *Database) GetHealth() Response {
+	if err := db.Ping(); err != nil {
+		return Response{
+			Status:  "DOWN",
+			Message: fmt.Sprintf("database ping failed. %v", err),
+		}
+	}
+	return Response{
+		Status:  "OK",
+		Message: "Database server is running.",
+	}
+}
+
+func (db *Database) NewEntry() Response {
+	return Response{
+		Status:  "OK",
+		Message: "[TODO] New entry created: .",
+	}
+}
+
+func (db *Database) EditEntry() Response {
+	return Response{
+		Status:  "OK",
+		Message: "Edited entry (TODO)",
+	}
+}
+
+func (db *Database) DeleteEntry() Response {
+	return Response{
+		Status:  "OK",
+		Message: "Entry deleted (TODO)",
+	}
+}
+
+func (db *Database) Close() error {
+	err := db.DB.Close()
+	if err != nil {
+		return fmt.Errorf("error closing database: %w", err)
 	}
 	return nil
 }
