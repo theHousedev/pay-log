@@ -2,15 +2,15 @@
 CREATE TABLE IF NOT EXISTS pay_events (
     id INTEGER PRIMARY KEY,
     pay_period_id INTEGER,
-    entry_date DATE NOT NULL,
-    entry_time TIME,
+    date DATE NOT NULL,
+    time TIME,
     -- 'flight', 'ground', 'admin', 'misc'
-    entry_type TEXT NOT NULL,
+    type TEXT NOT NULL,
     hours DECIMAL(4,2) NOT NULL,
-    customer_name TEXT,
+    name TEXT,
     notes TEXT,
-    ride_flag BOOLEAN DEFAULT FALSE,
-    meeting_flag BOOLEAN DEFAULT FALSE,
+    ride BOOLEAN DEFAULT FALSE,
+    meeting BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

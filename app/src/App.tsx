@@ -46,6 +46,9 @@ function App() {
     remaining: 1.8
   })
 
+  const bPort = import.meta.env.VITE_BACKEND_PORT;
+  const bPath = `http://localhost:${bPort}`;
+
   useEffect(() => {
     const calculateRemaining = () => {
       // TODO: pull past 24hrs from backend
@@ -61,11 +64,19 @@ function App() {
     calculateRemaining()
   }, [formData.date, formData.time])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('Entry submitted: ', formData)
-    // TODO: interact with backend
-  }
+  const handleSubmit = async (formData: EntryForm) => {
+    try {
+      const response = await fetch(`${bPath}/api/new-entry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const result = await response.json();
+      console.log('Backend response: ', result);
+    } catch (error) {
+      console.error('Error: ', error);
+    }
+  };
 
   const handleChange = (field: keyof EntryForm, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -86,7 +97,8 @@ function App() {
               key={type}
               type="button"
               onClick={() => handleChange('entryType', type)}
-              className={formData.entryType === type ? 'button activeButton' : 'button inactiveButton'}
+              className={formData.entryType === type ?
+                'button activeButton' : 'button inactiveButton'}
             >
               {type.charAt(0).toUpperCase() + type.slice(1)}
             </button>
@@ -199,11 +211,7 @@ function App() {
             }}>
               Remaining: {currentCheck.remaining}hrs
             </div>
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              className="submitButton"
-            >
+            <button type="submit" onClick={handleSubmit} className="submitButton">
               Submit
             </button>
           </div>

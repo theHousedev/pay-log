@@ -8,14 +8,38 @@ import (
 	"os"
 
 	"github.com/theHousedev/pay-log/backend/database"
+	"go.yaml.in/yaml/v3"
 )
 
-func getPort() string {
-	port := os.Getenv("SITE_BACKEND_PORT")
-	if port == "" {
-		log.Fatal("ERR: SITE_BACKEND_PORT missing, check config")
+type EntryData struct {
+	Date     string  `json:"date"`
+	Time     string  `json:"time"`
+	Type     string  `json:"type"`
+	Flight   float64 `json:"flight"`
+	Ground   float64 `json:"ground"`
+	Admin    float64 `json:"admin"`
+	Customer string  `json:"name"`
+	Notes    string  `json:"notes"`
+	Rides    int     `json:"rides"`
+	Meeting  bool    `json:"meeting"`
+}
+
+type SiteConfig struct {
+	BackendPort  string `yaml:"backend_port"`
+	FrontendPort string `yaml:"frontend_port"`
+}
+
+func loadConfig() (*SiteConfig, error) {
+	cfgPath := "../cfg.yaml"
+	data, err := os.ReadFile(cfgPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read config: %w", err)
 	}
-	return port
+	var cfg SiteConfig
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
+		return nil, fmt.Errorf("failed to parse config: %w", err)
+	}
+	return &cfg, nil
 }
 
 func openDB(dbPath string) *database.Database {
@@ -42,10 +66,14 @@ func toJSON(w http.ResponseWriter, response database.Response) {
 }
 
 func main() {
-	dbPath := "./pay_log.db"
-	port := getPort()
+	databasePath := "./pay_log.db"
+	cfg, err := loadConfig()
+	if err != nil {
+		log.Fatal("Failed to load config: ", err)
+	}
+	port := cfg.BackendPort
 
-	db := openDB(dbPath)
+	db := openDB(databasePath)
 	defer db.Close()
 
 	allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
