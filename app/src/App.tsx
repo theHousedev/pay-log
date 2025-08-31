@@ -114,7 +114,6 @@ function App() {
                 max="8"
                 value={formData.flightHours ?? ''}
                 onChange={(e) => handleNumberChange('flightHours', e.target.value)}
-                placeholder="2.5"
                 className="hoursInput"
               />
             </div>
@@ -148,7 +147,6 @@ function App() {
                 max="2"
                 value={formData.groundHours ?? ''}
                 onChange={(e) => handleNumberChange('groundHours', e.target.value)}
-                placeholder="0.5"
                 className="hoursInput"
               />
             </div>
@@ -158,7 +156,6 @@ function App() {
                 type="text"
                 value={formData.customerName}
                 onChange={(e) => handleChange('customerName', e.target.value)}
-                placeholder="Student name"
                 className="input"
               />
             </div>
@@ -170,8 +167,7 @@ function App() {
             <textarea
               value={formData.notes}
               onChange={(e) => handleChange('notes', e.target.value)}
-              placeholder="Optional notes..."
-              rows={3}
+              rows={2}
               className="textarea"
             />
           </div>
@@ -205,7 +201,8 @@ function App() {
           {/* Remaining Time and Submit */}
           <div className="remainingSection">
             <div className="remainingText" style={{
-              color: currentCheck.remaining < 2 ? '#f87171' : '#a9b1d6'
+              color: currentCheck.remaining < 2 ? '#f87171' : '#a9b1d6',
+              fontSize: '14px',
             }}>
               Remaining: {currentCheck.remaining}hrs
             </div>
