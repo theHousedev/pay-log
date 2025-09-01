@@ -19,6 +19,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: parseInt(getConfig().frontend_port),
-    host: true,
+    host: '0.0.0.0',
+  },
+  define: {
+    BACKEND_PORT: JSON.stringify(getConfig().backend_port),
   }
 })

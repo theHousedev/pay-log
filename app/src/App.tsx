@@ -3,15 +3,18 @@ import './styles.css'
 
 type EntryType = 'flight' | 'ground' | 'admin' | 'misc'
 
-interface EntryForm {
+interface Entry {
+  type: EntryType
   date: string
   time: string
-  flightHours: number | null
-  groundHours: number | null
-  hours: number | null
-  customerName: string
+  flight: number | null
+  ground: number | null
+  sim: number | null
+  admin: number | null
+  customer: string
   notes: string
-  entryType: EntryType
+  rides: number | null
+  meeting: boolean
 }
 
 interface CurrentCheck {
@@ -23,19 +26,22 @@ interface CurrentCheck {
 }
 
 function App() {
-  const [formData, setFormData] = useState<EntryForm>({
+  const [formData, setFormData] = useState<Entry>({
+    type: 'flight',
     date: new Date().toISOString().split('T')[0],
     time: new Date().toLocaleTimeString('en-US', {
       hour12: false,
       hour: '2-digit',
       minute: '2-digit'
     }),
-    flightHours: null,
-    groundHours: null,
-    hours: null,
-    customerName: '',
+    flight: null,
+    ground: null,
+    sim: null,
+    admin: null,
+    customer: '',
     notes: '',
-    entryType: 'flight'
+    rides: null,
+    meeting: false
   })
 
   const [currentCheck, setCurrentCheck] = useState<CurrentCheck>({
@@ -46,8 +52,8 @@ function App() {
     remaining: 1.8
   })
 
-  const bPort = import.meta.env.VITE_BACKEND_PORT;
-  const bPath = `http://localhost:${bPort}`;
+  const backendPort = (globalThis as any).BACKEND_PORT;
+  const backendPath = `http://localhost:${backendPort}/api`;
 
   useEffect(() => {
     const calculateRemaining = () => {
@@ -64,25 +70,29 @@ function App() {
     calculateRemaining()
   }, [formData.date, formData.time])
 
-  const handleSubmit = async (formData: EntryForm) => {
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    console.log('Form data sent:', formData)
+
     try {
-      const response = await fetch(`${bPath}/api/new-entry`, {
+      const response = await fetch(`${backendPath}/new`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
       const result = await response.json();
-      console.log('Backend response: ', result);
+      console.log('Backend response:', result);
     } catch (error) {
       console.error('Error: ', error);
     }
   };
 
-  const handleChange = (field: keyof EntryForm, value: string | number) => {
+  const handleChange = (field: keyof Entry, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleNumberChange = (field: keyof EntryForm, value: string) => {
+  const handleNumberChange = (field: keyof Entry, value: string) => {
     const numValue = value === '' ? null : parseFloat(value)
     setFormData(prev => ({ ...prev, [field]: numValue }))
   }
@@ -96,8 +106,8 @@ function App() {
             <button
               key={type}
               type="button"
-              onClick={() => handleChange('entryType', type)}
-              className={formData.entryType === type ?
+              onClick={() => handleChange('type', type)}
+              className={formData.type === type ?
                 'button activeButton' : 'button inactiveButton'}
             >
               {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -116,9 +126,9 @@ function App() {
                 inputMode="decimal"
                 step="0.1"
                 min="0"
-                max="8"
-                value={formData.flightHours ?? ''}
-                onChange={(e) => handleNumberChange('flightHours', e.target.value)}
+                max="8.0"
+                value={formData.flight ?? ''}
+                onChange={(e) => handleNumberChange('flight', e.target.value)}
                 className="hoursInput"
               />
             </div>
@@ -150,8 +160,8 @@ function App() {
                 step="0.1"
                 min="0"
                 max="2"
-                value={formData.groundHours ?? ''}
-                onChange={(e) => handleNumberChange('groundHours', e.target.value)}
+                value={formData.ground ?? ''}
+                onChange={(e) => handleNumberChange('ground', e.target.value)}
                 className="hoursInput"
               />
             </div>
@@ -159,8 +169,8 @@ function App() {
               <label className="label" style={{ textAlign: 'left' }}>Customer</label>
               <input
                 type="text"
-                value={formData.customerName}
-                onChange={(e) => handleChange('customerName', e.target.value)}
+                value={formData.customer}
+                onChange={(e) => handleChange('customer', e.target.value)}
                 className="input"
               />
             </div>
@@ -218,19 +228,19 @@ function App() {
         </div>
 
         {/* Debug Info */}
-        <div className="debugInfo">
+        {/* <div className="debugInfo">
           <p>DEBUG INFO</p>
-          <p>Current Entry Type: {formData.entryType}</p>
+          <p>Current Entry Type: {formData.type}</p>
           <p>Date: {formData.date}</p>
-          {formData.entryType === 'flight' ? (
+          {formData.type === 'flight' ? (
             <>
-              <p>Flight Hours: {formData.flightHours ?? 'empty'}</p>
-              <p>Ground Hours: {formData.groundHours ?? 'empty'}</p>
+              <p>Flight Hours: {formData.flight ?? 'empty'}</p>
+              <p>Ground Hours: {formData.ground ?? 'empty'}</p>
             </>
           ) : (
-            <p>Hours: {formData.hours ?? 'empty'}</p>
+            <p>Hours: {formData.admin ?? 'empty'}</p>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   )
