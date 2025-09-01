@@ -1,28 +1,15 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/rs/cors"
 	"github.com/theHousedev/pay-log/backend/database"
 	"go.yaml.in/yaml/v3"
 )
-
-type EntryData struct {
-	Date     string  `json:"date"`
-	Time     string  `json:"time"`
-	Type     string  `json:"type"`
-	Flight   float64 `json:"flight"`
-	Ground   float64 `json:"ground"`
-	Admin    float64 `json:"admin"`
-	Customer string  `json:"name"`
-	Notes    string  `json:"notes"`
-	Rides    int     `json:"rides"`
-	Meeting  bool    `json:"meeting"`
-}
 
 type SiteConfig struct {
 	BackendPort  string `yaml:"backend_port"`
@@ -60,57 +47,39 @@ func openDB(dbPath string) *database.Database {
 	return db
 }
 
-func toJSON(w http.ResponseWriter, response database.Response) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}
-
 func main() {
 	databasePath := "./pay_log.db"
+	db := openDB(databasePath)
+	defer db.Close()
+
 	cfg, err := loadConfig()
 	if err != nil {
 		log.Fatal("Failed to load config: ", err)
 	}
-	port := cfg.BackendPort
 
-	db := openDB(databasePath)
-	defer db.Close()
-
-	allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
-	if allowedOrigin == "" {
+	allowedOriginLoc := os.Getenv("ALLOWED_ORIGIN")
+	if allowedOriginLoc == "" {
 		log.Println("WARNING: ALLOWED_ORIGIN not set; defaulting to *")
-		allowedOrigin = "*"
+		allowedOriginLoc = "*"
 	}
+	allowedOriginLAN := fmt.Sprintf("http://10.0.0.8:%s", cfg.FrontendPort)
 
-	health := "/api/health"
-	new := "/api/new-entry"
-	edit := "/api/edit-entry"
-	delete := "/api/delete-entry"
-
-	http.HandleFunc(health, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
-		response := db.GetHealth()
-		toJSON(w, response)
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{allowedOriginLoc, allowedOriginLAN},
+		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type"},
 	})
 
-	http.HandleFunc(new, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
-		response := db.NewEntry()
-		toJSON(w, response)
-	})
+	http.HandleFunc("/api/new", newEntry(db))
+	http.HandleFunc("/api/edit", editEntry(db))
+	http.HandleFunc("/api/delete", deleteEntry(db))
+	http.HandleFunc("/api/health", healthCheck(db))
 
-	http.HandleFunc(edit, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
-		response := db.EditEntry()
-		toJSON(w, response)
-	})
+	log.Printf("Starting server on 127.0.0.1:%s", cfg.BackendPort)
+	handler := c.Handler(http.DefaultServeMux)
 
-	http.HandleFunc(delete, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
-		response := db.DeleteEntry()
-		toJSON(w, response)
-	})
-
-	log.Printf("Starting server on 127.0.0.1:%s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf("127.0.0.1:%s", port), nil))
+	log.Fatal(http.ListenAndServe(
+		fmt.Sprintf("127.0.0.1:%s", cfg.BackendPort),
+		handler),
+	)
 }

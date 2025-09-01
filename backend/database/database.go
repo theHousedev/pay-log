@@ -18,23 +18,18 @@ type Response struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-func Connect(path string) (*Database, error) {
-	sqlDB, err := sql.Open("sqlite3", path)
-	if err != nil {
-		return nil, fmt.Errorf("error opening database: %w", err)
-	}
-
-	db := &Database{sqlDB}
-
-	if err := db.createTables(); err != nil {
-		return nil, err
-	}
-
-	response := db.GetHealth()
-	if response.Status != "OK" {
-		return nil, fmt.Errorf("database init failed: %s", response.Message)
-	}
-	return db, nil
+type Entry struct {
+	Type     string  `json:"type"`
+	Date     string  `json:"date"`
+	Time     string  `json:"time"`
+	Flight   float64 `json:"flight"`
+	Ground   float64 `json:"ground"`
+	Sim      float64 `json:"sim"`
+	Admin    float64 `json:"admin"`
+	Customer string  `json:"customer"`
+	Notes    string  `json:"notes"`
+	Rides    int     `json:"rides"`
+	Meeting  bool    `json:"meeting"`
 }
 
 func (db *Database) createTables() error {
@@ -53,7 +48,7 @@ func (db *Database) createTables() error {
 	return nil
 }
 
-func (db *Database) GetHealth() Response {
+func (db *Database) HealthCheck() Response {
 	if err := db.Ping(); err != nil {
 		return Response{
 			Status:  "DOWN",
@@ -66,10 +61,14 @@ func (db *Database) GetHealth() Response {
 	}
 }
 
-func (db *Database) NewEntry() Response {
+func (db *Database) NewEntry(entry Entry) Response {
 	return Response{
-		Status:  "OK",
-		Message: "[TODO] New entry created: .",
+		Status: "OK",
+		Message: fmt.Sprintf(
+			"Entry created: %v hours for %s",
+			entry.Flight,
+			entry.Customer),
+		Data: entry,
 	}
 }
 
@@ -85,6 +84,25 @@ func (db *Database) DeleteEntry() Response {
 		Status:  "OK",
 		Message: "Entry deleted (TODO)",
 	}
+}
+
+func Connect(path string) (*Database, error) {
+	sqlDB, err := sql.Open("sqlite3", path)
+	if err != nil {
+		return nil, fmt.Errorf("error opening database: %w", err)
+	}
+
+	db := &Database{sqlDB}
+
+	if err := db.createTables(); err != nil {
+		return nil, err
+	}
+
+	response := db.HealthCheck()
+	if response.Status != "OK" {
+		return nil, fmt.Errorf("database init failed: %s", response.Message)
+	}
+	return db, nil
 }
 
 func (db *Database) Close() error {

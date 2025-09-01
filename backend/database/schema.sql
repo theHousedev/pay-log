@@ -2,19 +2,17 @@
 CREATE TABLE IF NOT EXISTS pay_events (
     id INTEGER PRIMARY KEY,
     pay_period_id INTEGER,
+    type TEXT NOT NULL, -- flight/ground/ride/misc
     date DATE NOT NULL,
     time TIME,
-    -- 'flight', 'ground', 'admin', 'misc'
-    type TEXT NOT NULL,
     hours DECIMAL(4,2) NOT NULL,
-    name TEXT,
+    customer TEXT,
     notes TEXT,
-    ride BOOLEAN DEFAULT FALSE,
+    rides INTEGER DEFAULT 0,
     meeting BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- per-period stats, including import fields and use status
 CREATE TABLE IF NOT EXISTS pay_periods (
     id INTEGER PRIMARY KEY,
     start_date DATE NOT NULL,
@@ -24,12 +22,12 @@ CREATE TABLE IF NOT EXISTS pay_periods (
     expected_pay_gross DECIMAL(8,2),
     actual_pay_gross DECIMAL(8,2),
     actual_pay_net DECIMAL(8,2),
-    -- 'current', 'past', 'confirmed', 'imported'
+    -- current/past/confirmed/imported
     status TEXT DEFAULT 'current',
     import_batch_id TEXT
 );
 
--- aggregation of monthly tracking data; may be oversized
+-- aggregation of monthly tracking data
 CREATE TABLE IF NOT EXISTS monthly_stats (
     id INTEGER PRIMARY KEY,
     year INTEGER NOT NULL,
