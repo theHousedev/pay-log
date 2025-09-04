@@ -28,19 +28,24 @@ type Entry struct {
 	AdminHours  *float64 `json:"admin_hours"`
 	Customer    string   `json:"customer"`
 	Notes       string   `json:"notes"`
-	Rides       int      `json:"ride_count"`
+	RideCount   int      `json:"ride_count"`
 	Meeting     bool     `json:"meeting"`
+}
+
+func nilCheck(f *float64) any {
+	if f == nil {
+		return nil
+	}
+	return *f
 }
 
 func (db *Database) createTables() error {
 	schema, err := os.ReadFile("database/schema.sql")
-
 	if err != nil {
 		return fmt.Errorf("schema read failed [%w]", err)
 	}
 
 	_, err = db.Exec(string(schema))
-
 	if err != nil {
 		return fmt.Errorf("table creation failed [%w]", err)
 	}
@@ -61,14 +66,49 @@ func (db *Database) HealthCheck() Response {
 	}
 }
 
+const newEntrySQL = `
+INSERT INTO pay_events (
+    type, date, time, 
+    flight_hours, ground_hours, sim_hours, admin_hours,
+    customer, notes, ride_count, meeting
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
 func (db *Database) NewEntry(entry Entry) Response {
+	fmt.Println("New entry called.")
+
+	result, err := db.Exec(newEntrySQL,
+		entry.Type,
+		entry.Date,
+		entry.Time,
+		nilCheck(entry.FlightHours),
+		nilCheck(entry.GroundHours),
+		nilCheck(entry.SimHours),
+		nilCheck(entry.AdminHours),
+		entry.Customer,
+		entry.Notes,
+		entry.RideCount,
+		entry.Meeting,
+	)
+	if err != nil {
+		return Response{
+			Status:  "ERROR",
+			Message: fmt.Sprintf("Error creating entry: %v", err),
+		}
+	}
+
+	newID, err := result.LastInsertId()
+	if err != nil {
+		return Response{
+			Status:  "ERROR",
+			Message: fmt.Sprintf("Entry created with unknown ID: %v", err),
+		}
+	}
+
 	return Response{
-		Status: "OK",
-		Message: fmt.Sprintf(
-			"Entry created: %v hours for %s",
-			entry.FlightHours,
-			entry.Customer),
-		Data: entry,
+		Data:    entry,
+		Status:  "OK",
+		Message: fmt.Sprintf("Successfully created entry ID: %d", newID),
 	}
 }
 

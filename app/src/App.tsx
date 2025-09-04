@@ -7,20 +7,23 @@ interface Entry {
   type: EntryType
   date: string
   time: string
-  flight: number | null
-  ground: number | null
-  sim: number | null
-  admin: number | null
+  flight_hours: number | null
+  ground_hours: number | null
+  sim_hours: number | null
+  admin_hours: number | null
   customer: string
   notes: string
-  rides: number | null
+  ride_count: number | null
   meeting: boolean
 }
 
 interface CurrentCheck {
   date: string
-  flight: number
-  total: number
+  flight_hours: number
+  ground_hours: number
+  sim_hours: number
+  admin_hours: number
+  all_hours: number
   gross: number
   remaining: number
 }
@@ -34,20 +37,23 @@ function App() {
       hour: '2-digit',
       minute: '2-digit'
     }),
-    flight: null,
-    ground: null,
-    sim: null,
-    admin: null,
+    flight_hours: null,
+    ground_hours: null,
+    sim_hours: null,
+    admin_hours: null,
     customer: '',
     notes: '',
-    rides: null,
+    ride_count: null,
     meeting: false
   })
 
   const [currentCheck, setCurrentCheck] = useState<CurrentCheck>({
     date: '05SEP2025',
-    flight: 19.3,
-    total: 33.1,
+    flight_hours: 19.3,
+    ground_hours: 13.8,
+    sim_hours: 0,
+    admin_hours: 0,
+    all_hours: 33.1,
     gross: 982.73,
     remaining: 1.8
   })
@@ -127,8 +133,8 @@ function App() {
                 step="0.1"
                 min="0"
                 max="8.0"
-                value={formData.flight ?? ''}
-                onChange={(e) => handleNumberChange('flight', e.target.value)}
+                value={formData.flight_hours ?? ''}
+                onChange={(e) => handleNumberChange('flight_hours', e.target.value)}
                 className="hoursInput"
               />
             </div>
@@ -160,8 +166,8 @@ function App() {
                 step="0.1"
                 min="0"
                 max="2"
-                value={formData.ground ?? ''}
-                onChange={(e) => handleNumberChange('ground', e.target.value)}
+                value={formData.ground_hours ?? ''}
+                onChange={(e) => handleNumberChange('ground_hours', e.target.value)}
                 className="hoursInput"
               />
             </div>
@@ -200,14 +206,14 @@ function App() {
               </div>
               <div className="currentCheckRow">
                 <span>Flight:</span>
-                <span>{currentCheck.flight}</span>
+                <span>{currentCheck.flight_hours}</span>
               </div>
               <div className="currentCheckRow">
-                <span>Total:</span>
-                <span>{currentCheck.total}</span>
+                <span>Total Payable Hours:</span>
+                <span>{currentCheck.all_hours}</span>
               </div>
               <div className="currentCheckRow">
-                <span>Gross:</span>
+                <span>Gross Pay:</span>
                 <span>$ {currentCheck.gross.toFixed(2)}</span>
               </div>
             </div>
@@ -234,11 +240,11 @@ function App() {
           <p>Date: {formData.date}</p>
           {formData.type === 'flight' ? (
             <>
-              <p>Flight Hours: {formData.flight ?? 'empty'}</p>
-              <p>Ground Hours: {formData.ground ?? 'empty'}</p>
+              <p>Flight Hours: {formData.flight_hours ?? 'empty'}</p>
+              <p>Ground Hours: {formData.ground_hours ?? 'empty'}</p>
             </>
           ) : (
-            <p>Hours: {formData.admin ?? 'empty'}</p>
+            <p>Hours: {formData.admin_hours ?? 'empty'}</p>
           )}
         </div> */}
       </div>
