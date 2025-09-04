@@ -19,17 +19,17 @@ type Response struct {
 }
 
 type Entry struct {
-	Type     string  `json:"type"`
-	Date     string  `json:"date"`
-	Time     string  `json:"time"`
-	Flight   float64 `json:"flight"`
-	Ground   float64 `json:"ground"`
-	Sim      float64 `json:"sim"`
-	Admin    float64 `json:"admin"`
-	Customer string  `json:"customer"`
-	Notes    string  `json:"notes"`
-	Rides    int     `json:"rides"`
-	Meeting  bool    `json:"meeting"`
+	Type        string   `json:"type"`
+	Date        string   `json:"date"`
+	Time        string   `json:"time"`
+	FlightHours *float64 `json:"flight_hours"`
+	GroundHours *float64 `json:"ground_hours"`
+	SimHours    *float64 `json:"sim_hours"`
+	AdminHours  *float64 `json:"admin_hours"`
+	Customer    string   `json:"customer"`
+	Notes       string   `json:"notes"`
+	Rides       int      `json:"ride_count"`
+	Meeting     bool     `json:"meeting"`
 }
 
 func (db *Database) createTables() error {
@@ -66,7 +66,7 @@ func (db *Database) NewEntry(entry Entry) Response {
 		Status: "OK",
 		Message: fmt.Sprintf(
 			"Entry created: %v hours for %s",
-			entry.Flight,
+			entry.FlightHours,
 			entry.Customer),
 		Data: entry,
 	}

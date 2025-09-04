@@ -1,14 +1,17 @@
 -- main table of payable tasks
-CREATE TABLE IF NOT EXISTS pay_events (
+CREATE TABLE pay_events (
     id INTEGER PRIMARY KEY,
     pay_period_id INTEGER,
-    type TEXT NOT NULL, -- flight/ground/ride/misc
+    type TEXT NOT NULL, -- flight/ground/sim/admin/misc
     date DATE NOT NULL,
     time TIME,
-    hours DECIMAL(4,2) NOT NULL,
+    flight_hours DECIMAL(4,2) DEFAULT NULL,
+    ground_hours DECIMAL(4,2) DEFAULT NULL,
+    sim_hours DECIMAL(4,2) DEFAULT NULL,
+    admin_hours DECIMAL(4,2) DEFAULT NULL,
     customer TEXT,
     notes TEXT,
-    rides INTEGER DEFAULT 0,
+    ride_count INTEGER DEFAULT NULL,
     meeting BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -18,7 +21,8 @@ CREATE TABLE IF NOT EXISTS pay_periods (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     pay_rate DECIMAL(6,2) NOT NULL,
-    pay_admin DECIMAL(6,2) NOT NULL,
+    admin_rate DECIMAL(6,2) NOT NULL,
+    pay_admin DECIMAL(6,2),
     expected_pay_gross DECIMAL(8,2),
     actual_pay_gross DECIMAL(8,2),
     actual_pay_net DECIMAL(8,2),
