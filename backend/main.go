@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/rs/cors"
-	"github.com/theHousedev/pay-log/backend/database"
+	db "github.com/theHousedev/pay-log/backend/database"
 	"go.yaml.in/yaml/v3"
 )
 
@@ -29,32 +29,32 @@ func loadConfig() (*SiteConfig, error) {
 	return &cfg, nil
 }
 
-func openDB(dbPath string) *database.Database {
+func openDB(dbPath string) *db.Database {
 	fmt.Println("\x1b[33m" + "server startup" + "\x1b[0m")
 
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
-		db, err := database.Connect(dbPath)
+		database, err := db.Connect(dbPath)
 		if err != nil {
 			fmt.Printf(err.Error())
 			log.Fatal("database creation failed")
 		}
 		fmt.Printf("\x1b[32m"+"new database created at '%s'"+"\x1b[0m\n", dbPath)
-		return db
+		return database
 	}
 
-	db, err := database.Connect(dbPath)
+	database, err := db.Connect(dbPath)
 	if err != nil {
 		fmt.Printf(err.Error())
 		log.Fatal("database connection failed")
 	}
 	fmt.Println("\x1b[32m" + "database initialized" + "\x1b[0m")
-	return db
+	return database
 }
 
 func main() {
-	databasePath := "./pay_log.db"
-	db := openDB(databasePath)
-	defer db.Close()
+	dbPath := "./pay_log.db"
+	database := openDB(dbPath)
+	defer database.Close()
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -74,10 +74,10 @@ func main() {
 		AllowedHeaders: []string{"Content-Type"},
 	})
 
-	http.HandleFunc("/api/new", newEntry(db))
-	http.HandleFunc("/api/edit", editEntry(db))
-	http.HandleFunc("/api/delete", deleteEntry(db))
-	http.HandleFunc("/api/health", healthCheck(db))
+	http.HandleFunc("/api/new", setupNewEntry(database))
+	http.HandleFunc("/api/edit", setupEditEntry(database))
+	http.HandleFunc("/api/delete", setupDeleteEntry(database))
+	http.HandleFunc("/api/health", setupCheckHealth(database))
 
 	fmt.Printf("\x1b[32m"+"running on 127.0.0.1:%s"+"\x1b[0m\n", cfg.BackendPort)
 	handler := c.Handler(http.DefaultServeMux)

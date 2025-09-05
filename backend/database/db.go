@@ -19,29 +19,29 @@ func Connect(path string) (*Database, error) {
 		return nil, fmt.Errorf("error opening database: %w", err)
 	}
 
-	db := &Database{sqlDB}
+	database := &Database{sqlDB}
 
-	if err := db.createTables(); err != nil {
+	if err := database.createTables(); err != nil {
 		return nil, err
 	}
 
-	response := db.HealthCheck()
+	response := database.CheckHealth()
 	if response.Status != "OK" {
 		return nil, fmt.Errorf(
 			"database init failed: %s",
 			response.Message,
 		)
 	}
-	return db, nil
+	return database, nil
 }
 
-func (db *Database) createTables() error {
+func (database *Database) createTables() error {
 	schema, err := os.ReadFile("database/schema.sql")
 	if err != nil {
 		return fmt.Errorf("schema read failed: %w", err)
 	}
 
-	_, err = db.Exec(string(schema))
+	_, err = database.Exec(string(schema))
 	if err != nil {
 		if strings.Contains(err.Error(), "already exists") {
 			tableName := getTableName(err.Error())
@@ -53,8 +53,8 @@ func (db *Database) createTables() error {
 	return nil
 }
 
-func (db *Database) HealthCheck() Response {
-	if err := db.Ping(); err != nil {
+func (database *Database) CheckHealth() Response {
+	if err := database.Ping(); err != nil {
 		return Response{
 			Status:  "DOWN",
 			Message: fmt.Sprintf("database ping failed: %v", err),
@@ -66,15 +66,15 @@ func (db *Database) HealthCheck() Response {
 	}
 }
 
-func (db *Database) Close() error {
-	err := db.DB.Close()
+func (database *Database) Close() error {
+	err := database.DB.Close()
 	if err != nil {
 		return fmt.Errorf("error closing database: %w", err)
 	}
 	return nil
 }
 
-func (db *Database) UpdatePaycheck(check Paycheck) Response {
+func (database *Database) UpdatePaycheck(check Paycheck) Response {
 	return Response{
 		Status:  "OK",
 		Message: "Paycheck updated (TODO)",

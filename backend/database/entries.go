@@ -1,6 +1,8 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const newEntrySQL = `
 INSERT INTO pay_entries (
@@ -10,10 +12,10 @@ INSERT INTO pay_entries (
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
-func (db *Database) NewEntry(entry Entry) Response {
+func (database *Database) NewEntry(entry Entry) Response {
 	fmt.Printf("new entry - ")
 
-	result, err := db.Exec(newEntrySQL,
+	result, err := database.Exec(newEntrySQL,
 		entry.Type,
 		entry.Date,
 		entry.Time,
@@ -37,33 +39,32 @@ func (db *Database) NewEntry(entry Entry) Response {
 	if err != nil {
 		return Response{
 			Status:  "ERROR",
-			Message: fmt.Sprintf("entry created with unknown ID: %v", err),
+			Message: fmt.Sprintf("created entry, ID unknown: %v", err),
 		}
 	}
 
 	return Response{
-		Data:    entry,
 		Status:  "OK",
-		Message: fmt.Sprintf("success, entry ID: %d", newID),
+		Message: fmt.Sprintf("created entry ID: %d", newID),
 	}
 }
 
-func (db *Database) EditEntry() Response {
+func (database *Database) EditEntry() Response {
 	return Response{
 		Status:  "OK",
 		Message: "Edited entry (TODO)",
 	}
 }
 
-func (db *Database) DeleteEntry() Response {
+func (database *Database) DeleteEntry() Response {
 	return Response{
 		Status:  "OK",
 		Message: "Entry deleted (TODO)",
 	}
 }
 
-func (db *Database) GetCheckEntries(checkID int) ([]Entry, error) {
-	rows, err := db.Query("SELECT * FROM pay_entries WHERE check_id = ?", checkID)
+func (database *Database) GetCheckEntries(checkID int) ([]Entry, error) {
+	rows, err := database.Query("SELECT * FROM pay_entries WHERE check_id = ?", checkID)
 	if err != nil {
 		return nil, err
 	}

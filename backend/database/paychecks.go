@@ -1,6 +1,16 @@
 package database
 
-func (db *Database) CreatePaycheck(paycheck Paycheck) Response { ... }
-func (db *Database) GetCurrentPaycheck() (*Paycheck, error) { ... }
-func (db *Database) GetPaycheckHours(paycheckID int) (map[string]float64, error) { ... }
-func (db *Database) CalculatePaycheckTotal(paycheckID int) (*PaycheckTotal, error) { ... }
+func (database *Database) CreatePaycheck(paycheck Paycheck) Response {
+	return Response{
+		Status:  "OK",
+		Message: "Paycheck created (TODO)",
+	}
+}
+
+func (database *Database) GetCurrentPaycheck() (*Paycheck, error) {
+	return nil, nil
+}
+
+func (database *Database) GetPaycheckHours(paycheckID int) (map[string]float64, error) {
+	return nil, nil
+}

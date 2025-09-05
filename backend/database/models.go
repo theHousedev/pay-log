@@ -3,6 +3,7 @@ package database
 import "encoding/json"
 
 type Entry struct {
+	ID          int      `json:"id"`
 	Type        string   `json:"type"`
 	Date        string   `json:"date"`
 	Time        string   `json:"time"`

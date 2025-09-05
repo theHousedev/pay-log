@@ -106,7 +106,6 @@ function App() {
   return (
     <div className="container">
       <div className="contentWrapper">
-        {/* Entry Type Buttons - Top Navigation */}
         <div className="buttonRow">
           {(['flight', 'ground', 'admin', 'misc'] as EntryType[]).map(type => (
             <button
@@ -196,7 +195,6 @@ function App() {
 
         {/* Current Check Section - Shared Row */}
         <div className="currentCheckSection">
-          {/* Current Check Box */}
           <div className="currentCheckBox">
             <h2 className="currentCheckTitle">Current Check</h2>
             <div style={{ fontSize: '16px', fontFamily: 'monospace' }}>

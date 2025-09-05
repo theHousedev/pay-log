@@ -1,3 +1,5 @@
+import path from 'path'
+import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import fs from 'fs'
 import yaml from 'js-yaml'
@@ -16,10 +18,15 @@ function getConfig() {
 }
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     port: parseInt(getConfig().frontend_port),
     host: '0.0.0.0',
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
   },
   define: {
     BACKEND_PORT: JSON.stringify(getConfig().backend_port),

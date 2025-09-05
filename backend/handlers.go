@@ -4,52 +4,52 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/theHousedev/pay-log/backend/database"
+	db "github.com/theHousedev/pay-log/backend/database"
 )
 
-func toJSON(w http.ResponseWriter, response database.Response) {
+func toJSON(w http.ResponseWriter, r db.Response) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(r)
 }
 
-func newEntry(db *database.Database) http.HandlerFunc {
+func setupNewEntry(database *db.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Invalid method", http.StatusMethodNotAllowed)
 			return
 		}
 
-		var entry database.Entry
+		var entry db.Entry
 		if err := json.NewDecoder(r.Body).Decode(&entry); err != nil {
-			toJSON(w, database.Response{
+			toJSON(w, db.Response{
 				Status:  "ERROR",
 				Message: "Invalid JSON format",
 			})
 			return
 		}
 
-		response := db.NewEntry(entry)
+		response := database.NewEntry(entry)
 		toJSON(w, response)
 	}
 }
 
-func editEntry(db *database.Database) http.HandlerFunc {
+func setupEditEntry(database *db.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		response := db.EditEntry()
+		response := database.EditEntry()
 		toJSON(w, response)
 	}
 }
 
-func deleteEntry(db *database.Database) http.HandlerFunc {
+func setupDeleteEntry(database *db.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		response := db.DeleteEntry()
+		response := database.DeleteEntry()
 		toJSON(w, response)
 	}
 }
 
-func healthCheck(db *database.Database) http.HandlerFunc {
+func setupCheckHealth(database *db.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		response := db.HealthCheck()
+		response := database.CheckHealth()
 		toJSON(w, response)
 	}
 }
