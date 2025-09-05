@@ -30,20 +30,24 @@ func loadConfig() (*SiteConfig, error) {
 }
 
 func openDB(dbPath string) *database.Database {
-	fmt.Println("Starting pay-log database server...")
+	fmt.Println("\x1b[33m" + "server startup" + "\x1b[0m")
+
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		db, err := database.Connect(dbPath)
 		if err != nil {
-			log.Fatal("Failed to create database: ", err)
+			fmt.Printf(err.Error())
+			log.Fatal("database creation failed")
 		}
-		fmt.Println("New database created at '", dbPath, "'")
+		fmt.Printf("\x1b[32m"+"new database created at '%s'"+"\x1b[0m\n", dbPath)
 		return db
 	}
+
 	db, err := database.Connect(dbPath)
 	if err != nil {
-		log.Fatal("", err)
+		fmt.Printf(err.Error())
+		log.Fatal("database connection failed")
 	}
-	fmt.Println("Database initialized.")
+	fmt.Println("\x1b[32m" + "database initialized" + "\x1b[0m")
 	return db
 }
 
@@ -54,12 +58,12 @@ func main() {
 
 	cfg, err := loadConfig()
 	if err != nil {
-		log.Fatal("Failed to load config: ", err)
+		log.Fatal("failed to load config: ", err)
 	}
 
 	allowedOriginLoc := os.Getenv("ALLOWED_ORIGIN")
 	if allowedOriginLoc == "" {
-		log.Println("WARNING: ALLOWED_ORIGIN not set; defaulting to *")
+		fmt.Println("ALLOWED_ORIGIN not set; defaulting to *")
 		allowedOriginLoc = "*"
 	}
 	allowedOriginLAN := fmt.Sprintf("http://10.0.0.8:%s", cfg.FrontendPort)
@@ -75,11 +79,8 @@ func main() {
 	http.HandleFunc("/api/delete", deleteEntry(db))
 	http.HandleFunc("/api/health", healthCheck(db))
 
-	log.Printf("Starting server on 127.0.0.1:%s", cfg.BackendPort)
+	fmt.Printf("\x1b[32m"+"running on 127.0.0.1:%s"+"\x1b[0m\n", cfg.BackendPort)
 	handler := c.Handler(http.DefaultServeMux)
-
 	log.Fatal(http.ListenAndServe(
-		fmt.Sprintf("127.0.0.1:%s", cfg.BackendPort),
-		handler),
-	)
+		fmt.Sprintf("127.0.0.1:%s", cfg.BackendPort), handler))
 }

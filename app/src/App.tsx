@@ -17,7 +17,7 @@ interface Entry {
   meeting: boolean
 }
 
-interface CurrentCheck {
+interface PayPeriod {
   date: string
   flight_hours: number
   ground_hours: number
@@ -47,7 +47,7 @@ function App() {
     meeting: false
   })
 
-  const [currentCheck, setCurrentCheck] = useState<CurrentCheck>({
+  const [payPeriod, setPayPeriod] = useState<PayPeriod>({
     date: '05SEP2025',
     flight_hours: 19.3,
     ground_hours: 13.8,
@@ -67,7 +67,7 @@ function App() {
       const past24Hours = 6.2
       const remaining = Math.max(0, 8.0 - past24Hours)
 
-      setCurrentCheck(prev => ({
+      setPayPeriod(prev => ({
         ...prev,
         remaining: Math.round(remaining * 10) / 10
       }))
@@ -202,19 +202,31 @@ function App() {
             <div style={{ fontSize: '16px', fontFamily: 'monospace' }}>
               <div className="currentCheckRow">
                 <span>Date:</span>
-                <span>{currentCheck.date}</span>
+                <span>{payPeriod.date}</span>
               </div>
               <div className="currentCheckRow">
                 <span>Flight:</span>
-                <span>{currentCheck.flight_hours}</span>
+                <span>{payPeriod.flight_hours}</span>
               </div>
               <div className="currentCheckRow">
-                <span>Total Payable Hours:</span>
-                <span>{currentCheck.all_hours}</span>
+                <span>Ground:</span>
+                <span>{payPeriod.ground_hours}</span>
+              </div>
+              <div className="currentCheckRow">
+                <span>Sim:</span>
+                <span>{payPeriod.sim_hours}</span>
+              </div>
+              <div className="currentCheckRow">
+                <span>Admin:</span>
+                <span>{payPeriod.admin_hours}</span>
+              </div>
+              <div className="currentCheckRow">
+                <span>Total Hours:</span>
+                <span>{payPeriod.all_hours}</span>
               </div>
               <div className="currentCheckRow">
                 <span>Gross Pay:</span>
-                <span>$ {currentCheck.gross.toFixed(2)}</span>
+                <span>$ {payPeriod.gross.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -222,10 +234,10 @@ function App() {
           {/* Remaining Time and Submit */}
           <div className="remainingSection">
             <div className="remainingText" style={{
-              color: currentCheck.remaining < 2 ? '#f87171' : '#a9b1d6',
+              color: payPeriod.remaining < 2 ? '#f87171' : '#a9b1d6',
               fontSize: '14px',
             }}>
-              Remaining: {currentCheck.remaining}hrs
+              Remaining: {payPeriod.remaining}hrs
             </div>
             <button type="submit" onClick={handleSubmit} className="submitButton">
               Submit

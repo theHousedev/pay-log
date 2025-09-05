@@ -1,5 +1,4 @@
--- main table of payable tasks
-CREATE TABLE pay_events (
+CREATE TABLE pay_entries (
     id INTEGER PRIMARY KEY,
     pay_period_id INTEGER,
     type TEXT NOT NULL, -- flight/ground/sim/admin/misc
