@@ -1,32 +1,7 @@
-import { useState, useEffect } from 'react'
 import './styles.css'
-
-type EntryType = 'flight' | 'ground' | 'admin' | 'misc'
-
-interface Entry {
-  type: EntryType
-  date: string
-  time: string
-  flight_hours: number | null
-  ground_hours: number | null
-  sim_hours: number | null
-  admin_hours: number | null
-  customer: string
-  notes: string
-  ride_count: number | null
-  meeting: boolean
-}
-
-interface PayPeriod {
-  date: string
-  flight_hours: number
-  ground_hours: number
-  sim_hours: number
-  admin_hours: number
-  all_hours: number
-  gross: number
-  remaining: number
-}
+import { useState, useEffect } from 'react'
+import type { Entry, EntryType, PayPeriod } from './types'
+import Form from './components/form'
 
 function App() {
   const [formData, setFormData] = useState<Entry>({
@@ -121,77 +96,11 @@ function App() {
         </div>
 
         {/* Entry Form */}
-        <div className="formSection">
-          {/* Row 1: Flight, Time, Date */}
-          <label className="label" style={{ textAlign: 'left' }}>Flight</label>
-          <div className="row1">
-            <div>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.1"
-                min="0"
-                max="8.0"
-                value={formData.flight_hours ?? ''}
-                onChange={(e) => handleNumberChange('flight_hours', e.target.value)}
-                className="hoursInput"
-              />
-            </div>
-            <div>
-              <input
-                type="time"
-                value={formData.time}
-                onChange={(e) => handleChange('time', e.target.value)}
-                className="timeInput"
-              />
-            </div>
-            <div>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleChange('date', e.target.value)}
-                className="dateInput"
-              />
-            </div>
-          </div>
-
-          {/* Row 2: Ground, Customer */}
-          <div className="row2">
-            <div>
-              <label className="label" style={{ textAlign: 'left' }}>Ground</label>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.1"
-                min="0"
-                max="2"
-                value={formData.ground_hours ?? ''}
-                onChange={(e) => handleNumberChange('ground_hours', e.target.value)}
-                className="hoursInput"
-              />
-            </div>
-            <div>
-              <label className="label" style={{ textAlign: 'left' }}>Customer</label>
-              <input
-                type="text"
-                value={formData.customer}
-                onChange={(e) => handleChange('customer', e.target.value)}
-                className="input"
-              />
-            </div>
-          </div>
-
-          {/* Row 3: Notes */}
-          <div>
-            <label className="label" style={{ textAlign: 'left' }}>Notes</label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
-              rows={2}
-              className="textarea"
-            />
-          </div>
-        </div>
+        <Form
+          input={formData}
+          onFieldChange={handleChange}
+          onNumberChange={handleNumberChange}
+        />
 
         {/* Current Check Section - Shared Row */}
         <div className="currentCheckSection">
