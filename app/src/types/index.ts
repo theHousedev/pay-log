@@ -1,4 +1,4 @@
-export type EntryType = 'flight' | 'ground' | 'admin' | 'misc'
+export type EntryType = 'flight' | 'ground' | 'sim' | 'admin' | 'misc'
 
 export interface Entry {
     type: EntryType

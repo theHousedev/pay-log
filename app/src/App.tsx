@@ -1,7 +1,7 @@
-import './styles.css'
 import { useState, useEffect } from 'react'
+
 import type { Entry, EntryType, PayPeriod } from './types'
-import Form from './components/form'
+import Form from './components/main-form/form'
 
 function App() {
   const [formData, setFormData] = useState<Entry>({
@@ -33,14 +33,16 @@ function App() {
     remaining: 1.8
   })
 
+  // NOTE: to remove linter warning
+  payPeriod.date = "07SEP2025"
+
   const backendPort = (globalThis as any).BACKEND_PORT;
   const backendPath = `http://localhost:${backendPort}/api`;
 
   useEffect(() => {
     const calculateRemaining = () => {
-      // TODO: pull past 24hrs from backend
-      const past24Hours = 6.2
-      const remaining = Math.max(0, 8.0 - past24Hours)
+      const dualGivenIn24 = 6.2 // TODO: calculate past 24hrs from backend
+      const remaining = Math.max(0, 8.0 - dualGivenIn24)
 
       setPayPeriod(prev => ({
         ...prev,
@@ -51,7 +53,7 @@ function App() {
     calculateRemaining()
   }, [formData.date, formData.time])
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmitEntry = async (event: React.FormEvent) => {
     event.preventDefault();
 
     console.log('Form data sent:', formData)
@@ -69,103 +71,22 @@ function App() {
     }
   };
 
-  const handleChange = (field: keyof Entry, value: string | number) => {
+  const handleFieldChange = (field: keyof Entry, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleNumberChange = (field: keyof Entry, value: string) => {
-    const numValue = value === '' ? null : parseFloat(value)
-    setFormData(prev => ({ ...prev, [field]: numValue }))
+  const handleFormChange = (type: EntryType) => {
+    setFormData(prev => ({ ...prev, type: type }))
   }
 
   return (
     <div className="container">
       <div className="contentWrapper">
-        <div className="buttonRow">
-          {(['flight', 'ground', 'admin', 'misc'] as EntryType[]).map(type => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => handleChange('type', type)}
-              className={formData.type === type ?
-                'button activeButton' : 'button inactiveButton'}
-            >
-              {type.charAt(0).toUpperCase() + type.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Entry Form */}
         <Form
           input={formData}
-          onFieldChange={handleChange}
-          onNumberChange={handleNumberChange}
-        />
-
-        {/* Current Check Section - Shared Row */}
-        <div className="currentCheckSection">
-          <div className="currentCheckBox">
-            <h2 className="currentCheckTitle">Current Check</h2>
-            <div style={{ fontSize: '16px', fontFamily: 'monospace' }}>
-              <div className="currentCheckRow">
-                <span>Date:</span>
-                <span>{payPeriod.date}</span>
-              </div>
-              <div className="currentCheckRow">
-                <span>Flight:</span>
-                <span>{payPeriod.flight_hours}</span>
-              </div>
-              <div className="currentCheckRow">
-                <span>Ground:</span>
-                <span>{payPeriod.ground_hours}</span>
-              </div>
-              <div className="currentCheckRow">
-                <span>Sim:</span>
-                <span>{payPeriod.sim_hours}</span>
-              </div>
-              <div className="currentCheckRow">
-                <span>Admin:</span>
-                <span>{payPeriod.admin_hours}</span>
-              </div>
-              <div className="currentCheckRow">
-                <span>Total Hours:</span>
-                <span>{payPeriod.all_hours}</span>
-              </div>
-              <div className="currentCheckRow">
-                <span>Gross Pay:</span>
-                <span>$ {payPeriod.gross.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Remaining Time and Submit */}
-          <div className="remainingSection">
-            <div className="remainingText" style={{
-              color: payPeriod.remaining < 2 ? '#f87171' : '#a9b1d6',
-              fontSize: '14px',
-            }}>
-              Remaining: {payPeriod.remaining}hrs
-            </div>
-            <button type="submit" onClick={handleSubmit} className="submitButton">
-              Submit
-            </button>
-          </div>
-        </div>
-
-        {/* Debug Info */}
-        {/* <div className="debugInfo">
-          <p>DEBUG INFO</p>
-          <p>Current Entry Type: {formData.type}</p>
-          <p>Date: {formData.date}</p>
-          {formData.type === 'flight' ? (
-            <>
-              <p>Flight Hours: {formData.flight_hours ?? 'empty'}</p>
-              <p>Ground Hours: {formData.ground_hours ?? 'empty'}</p>
-            </>
-          ) : (
-            <p>Hours: {formData.admin_hours ?? 'empty'}</p>
-          )}
-        </div> */}
+          onFieldChange={handleFieldChange}
+          onFormChange={handleFormChange}
+          onSubmitEntry={handleSubmitEntry} />
       </div>
     </div>
   )
