@@ -20,14 +20,11 @@ func Connect(path string) (*Database, error) {
 	}
 
 	database := &Database{sqlDB}
-
 	if err := database.createTables(); err != nil {
 		return nil, err
 	}
-
-	// Clean up period statuses to ensure only one current period
-	if err := database.CleanupPeriodStatuses(); err != nil {
-		return nil, fmt.Errorf("failed to cleanup period statuses: %w", err)
+	if err := database.UpdatePayPeriodStatus(); err != nil {
+		return nil, fmt.Errorf("failed to update period statuses: %w", err)
 	}
 
 	response := database.CheckHealth()

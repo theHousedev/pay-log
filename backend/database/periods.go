@@ -2,11 +2,12 @@ package database
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
-// CleanupPeriodStatuses -
-func (db *Database) CleanupPeriodStatuses() error {
+// UpdatePayPeriodStatus -
+func (db *Database) UpdatePayPeriodStatus() error {
 	query := `
 		SELECT id FROM pay_periods 
 		WHERE ? BETWEEN start_date AND end_date 
@@ -25,7 +26,7 @@ func (db *Database) CleanupPeriodStatuses() error {
 	updateQuery := `UPDATE pay_periods SET status = 'past' WHERE id != ?`
 	_, err = db.Exec(updateQuery, currentPeriodID)
 	if err != nil {
-		return fmt.Errorf("failed to cleanup period statuses: %v", err)
+		return fmt.Errorf("failed to update period statuses: %v", err)
 	}
 
 	currentQuery := `UPDATE pay_periods SET status = 'current' WHERE id = ?`
@@ -43,14 +44,13 @@ func (db *Database) GetCurrentPayPeriod(date string) (Paycheck, error) {
 		SELECT id, start_date, end_date, pay_date, expected_pay_gross, 
 		       actual_pay_gross, actual_pay_net, last_updated
 		FROM pay_periods 
-		WHERE ? BETWEEN start_date AND end_date 
-		AND status = 'current'
+		WHERE status = 'current'
 		ORDER BY start_date DESC
 		LIMIT 1
 	`
 
 	var period Paycheck
-	err := db.QueryRow(query, date).Scan(
+	err := db.QueryRow(query).Scan(
 		&period.ID, &period.BeginDate, &period.EndDate, &period.PayDate,
 		&period.GrossEarned, &period.GrossActual, &period.NetActual,
 		&period.LastUpdated,
@@ -60,6 +60,33 @@ func (db *Database) GetCurrentPayPeriod(date string) (Paycheck, error) {
 		return period, nil
 	}
 
+	query = `
+		SELECT id, start_date, end_date, pay_date, expected_pay_gross, 
+		       actual_pay_gross, actual_pay_net, last_updated
+		FROM pay_periods 
+		WHERE ? BETWEEN start_date AND end_date
+		ORDER BY start_date DESC
+		LIMIT 1
+	`
+
+	err = db.QueryRow(query, date).Scan(
+		&period.ID, &period.BeginDate, &period.EndDate, &period.PayDate,
+		&period.GrossEarned, &period.GrossActual, &period.NetActual,
+		&period.LastUpdated,
+	)
+
+	if err == nil {
+		err = db.UpdatePayPeriodStatus()
+		if err != nil {
+			return Paycheck{}, fmt.Errorf("failed to update period statuses: %v", err)
+		}
+
+		_, err = db.Exec("UPDATE pay_periods SET status = 'current' WHERE id = ?", period.ID)
+		if err != nil {
+			return Paycheck{}, fmt.Errorf("failed to update period status: %v", err)
+		}
+		return period, nil
+	}
 	return db.CreateNewPayPeriod(date)
 }
 
@@ -71,7 +98,7 @@ func (db *Database) CreateNewPayPeriod(date string) (Paycheck, error) {
 	}
 
 	weekday := int(parsedDate.Weekday())
-	if weekday == 0 { // Sunday
+	if weekday == 0 {
 		weekday = 7
 	}
 	daysToMonday := weekday - 1
@@ -96,8 +123,8 @@ func (db *Database) CreateNewPayPeriod(date string) (Paycheck, error) {
 	}
 
 	insertQuery := `
-		INSERT INTO pay_periods (start_date, end_date, pay_date, status)
-		VALUES (?, ?, ?, 'current')
+		INSERT INTO pay_periods (start_date, end_date, pay_date, status, last_updated)
+		VALUES (?, ?, ?, 'current', CURRENT_TIMESTAMP)
 	`
 
 	result, err := db.Exec(insertQuery,
@@ -107,6 +134,32 @@ func (db *Database) CreateNewPayPeriod(date string) (Paycheck, error) {
 	)
 
 	if err != nil {
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			query := `
+				SELECT id, start_date, end_date, pay_date, expected_pay_gross, 
+				       actual_pay_gross, actual_pay_net, last_updated
+				FROM pay_periods 
+				WHERE start_date = ? AND end_date = ?
+				LIMIT 1
+			`
+
+			var period Paycheck
+			err = db.QueryRow(query, periodStart.Format("2006-01-02"), periodEnd.Format("2006-01-02")).Scan(
+				&period.ID, &period.BeginDate, &period.EndDate, &period.PayDate,
+				&period.GrossEarned, &period.GrossActual, &period.NetActual,
+				&period.LastUpdated,
+			)
+
+			if err == nil {
+				_, err = db.Exec("UPDATE pay_periods SET status = 'current' WHERE id = ?", period.ID)
+				if err != nil {
+					return Paycheck{}, fmt.Errorf("failed to update period status: %v", err)
+				}
+				return period, nil
+			} else {
+				return Paycheck{}, fmt.Errorf("failed to find existing period: %v", err)
+			}
+		}
 		return Paycheck{}, fmt.Errorf("failed to create pay period: %v", err)
 	}
 
@@ -139,7 +192,6 @@ func (db *Database) GetCurrentRates(date string) (PayRate, error) {
 	)
 
 	if err != nil {
-		// ridiculous rates to flag erroneous behavior
 		return PayRate{
 			EffectiveDate: date,
 			CFIRate:       9999.99,
@@ -156,7 +208,6 @@ func (db *Database) CalculatePeriodTotals(periodID int, startDate, endDate strin
 	if err != nil {
 		return nil, fmt.Errorf("failed to get rates: %v", err)
 	}
-
 	hoursQuery := `
 		SELECT 
 			COALESCE(SUM(flight_hours), 0) as flight_hours,
@@ -178,7 +229,6 @@ func (db *Database) CalculatePeriodTotals(periodID int, startDate, endDate strin
 		return nil, fmt.Errorf("failed to calculate hours: %v", err)
 	}
 
-	// Add ride hours to admin hours (0.2 hours per ride)
 	rideHours := float64(totalRides) * 0.2
 	totalAdminHours := adminHours + rideHours
 
@@ -192,7 +242,7 @@ func (db *Database) CalculatePeriodTotals(periodID int, startDate, endDate strin
 		"flight_hours": flightHours,
 		"ground_hours": groundHours,
 		"sim_hours":    simHours,
-		"admin_hours":  totalAdminHours, // Include ride hours
+		"admin_hours":  totalAdminHours,
 		"ride_hours":   rideHours,
 		"total_rides":  totalRides,
 		"total_hours":  cfiHours + totalAdminHours,

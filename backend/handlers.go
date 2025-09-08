@@ -35,6 +35,18 @@ func setupNewEntry(database *db.Database) http.HandlerFunc {
 	}
 }
 
+func auth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		username, password, ok := r.BasicAuth()
+		if !ok || username != "kh" || password != "369636" {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Pay Log Access"`)
+			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+			return
+		}
+		next(w, r)
+	}
+}
+
 func setupEditEntry(database *db.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		response := database.EditEntry()

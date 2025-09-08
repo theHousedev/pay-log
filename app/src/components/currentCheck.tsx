@@ -7,11 +7,11 @@ interface CurrentCheckProps {
     isLoading?: boolean;
 }
 
-export default function CurrentCheck({ payPeriod, isLoading = false }: CurrentCheckProps) {
-    // attempts to correct timezone offset; dates should be validated per-period
+export default function currentCheck({ payPeriod, isLoading = false }: CurrentCheckProps) {
     const formatDate = (dateStr: string) => {
         if (!dateStr) return '';
-        const [year, month, day] = dateStr.split('-').map(Number);
+        const datePart = dateStr.split('T')[0];
+        const [year, month, day] = datePart.split('-').map(Number);
         const date = new Date(year, month - 1, day);
         return date.toLocaleDateString('en-US', {
             month: 'short',

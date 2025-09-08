@@ -18,14 +18,14 @@ type Entry struct {
 }
 
 type Paycheck struct {
-	ID          int     `json:"id"`
-	BeginDate   string  `json:"begin_date"`
-	EndDate     string  `json:"end_date"`
-	PayDate     string  `json:"pay_date"`
-	GrossEarned float64 `json:"gross_earnings"`
-	GrossActual float64 `json:"gross_actual"`
-	NetActual   float64 `json:"net_actual"`
-	LastUpdated string  `json:"last_updated"`
+	ID          int      `json:"id"`
+	BeginDate   string   `json:"begin_date"`
+	EndDate     string   `json:"end_date"`
+	PayDate     string   `json:"pay_date"`
+	GrossEarned *float64 `json:"gross_earnings,omitempty"`
+	GrossActual *float64 `json:"gross_actual,omitempty"`
+	NetActual   *float64 `json:"net_actual,omitempty"`
+	LastUpdated string   `json:"last_updated"`
 }
 
 type PayRate struct {

@@ -21,7 +21,7 @@ interface FormProps {
     entryValue?: number;
 }
 
-function Form({ input, onFieldChange, onFormChange, onSubmitEntry, entryValue = 0 }: FormProps) {
+function MainForm({ input, onFieldChange, onFormChange, onSubmitEntry, entryValue = 0 }: FormProps) {
     return (
         <div className="flex justify-center items-center mt-1.5">
             <Card className="w-full" id="main-form"
@@ -83,4 +83,4 @@ function Form({ input, onFieldChange, onFormChange, onSubmitEntry, entryValue = 
     )
 }
 
-export default Form;
+export default MainForm;

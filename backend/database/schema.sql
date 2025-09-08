@@ -32,8 +32,9 @@ CREATE TABLE IF NOT EXISTS pay_periods (
     actual_pay_gross DECIMAL(8,2),
     actual_pay_net DECIMAL(8,2),
     status TEXT DEFAULT 'current',    -- current/past/confirmed/imported
-    import_batch_id TEXT
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    import_batch_id TEXT,
+    last_updated TIMESTAMP DEFAULT NULL,
+    UNIQUE(start_date, end_date)
 );
 
 

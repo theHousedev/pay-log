@@ -13,7 +13,7 @@ INSERT INTO pay_entries (
 `
 
 func (database *Database) NewEntry(entry Entry) Response {
-	fmt.Printf("Creating new entry - date: %s, time: %s - ", entry.Date, entry.Time)
+	fmt.Printf("Creating new entry...")
 
 	result, err := database.Exec(newEntrySQL,
 		entry.Type,
@@ -45,7 +45,7 @@ func (database *Database) NewEntry(entry Entry) Response {
 		}
 	}
 
-	fmt.Printf("OK! Entry ID: %d\n", newID)
+	fmt.Printf("OK - Entry ID: %d\n", newID)
 	return Response{
 		Status:  "OK",
 		Message: fmt.Sprintf("new entry ID: %d", newID),

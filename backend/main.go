@@ -74,11 +74,11 @@ func main() {
 		AllowedHeaders: []string{"Content-Type"},
 	})
 
-	http.HandleFunc("/api/new", setupNewEntry(database))
-	http.HandleFunc("/api/edit", setupEditEntry(database))
-	http.HandleFunc("/api/delete", setupDeleteEntry(database))
-	http.HandleFunc("/api/health", setupCheckHealth(database))
-	http.HandleFunc("/api/current-period", setupCurrentPeriod(database))
+	http.HandleFunc("/api/new", auth(setupNewEntry(database)))
+	http.HandleFunc("/api/edit", auth(setupEditEntry(database)))
+	http.HandleFunc("/api/delete", auth(setupDeleteEntry(database)))
+	http.HandleFunc("/api/health", auth(setupCheckHealth(database)))
+	http.HandleFunc("/api/current-period", auth(setupCurrentPeriod(database)))
 
 	fmt.Printf("\x1b[32m"+"running on 0.0.0.0:%s"+"\x1b[0m\n", cfg.BackendPort)
 	handler := c.Handler(http.DefaultServeMux)
