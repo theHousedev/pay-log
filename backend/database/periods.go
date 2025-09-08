@@ -162,23 +162,29 @@ func (db *Database) CalculatePeriodTotals(periodID int, startDate, endDate strin
 			COALESCE(SUM(flight_hours), 0) as flight_hours,
 			COALESCE(SUM(ground_hours), 0) as ground_hours,
 			COALESCE(SUM(sim_hours), 0) as sim_hours,
-			COALESCE(SUM(admin_hours), 0) as admin_hours
+			COALESCE(SUM(admin_hours), 0) as admin_hours,
+			COALESCE(SUM(ride_count), 0) as total_rides
 		FROM pay_entries 
 		WHERE date BETWEEN ? AND ?
 	`
 
 	var flightHours, groundHours, simHours, adminHours float64
+	var totalRides int
 	err = db.QueryRow(hoursQuery, startDate, endDate).Scan(
-		&flightHours, &groundHours, &simHours, &adminHours,
+		&flightHours, &groundHours, &simHours, &adminHours, &totalRides,
 	)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to calculate hours: %v", err)
 	}
 
+	// Add ride hours to admin hours (0.2 hours per ride)
+	rideHours := float64(totalRides) * 0.2
+	totalAdminHours := adminHours + rideHours
+
 	cfiHours := flightHours + groundHours + simHours
 	cfiPay := cfiHours * rates.CFIRate
-	adminPay := adminHours * rates.AdminRate
+	adminPay := totalAdminHours * rates.AdminRate
 	totalGross := cfiPay + adminPay
 
 	return map[string]interface{}{
@@ -186,8 +192,10 @@ func (db *Database) CalculatePeriodTotals(periodID int, startDate, endDate strin
 		"flight_hours": flightHours,
 		"ground_hours": groundHours,
 		"sim_hours":    simHours,
-		"admin_hours":  adminHours,
-		"total_hours":  cfiHours + adminHours,
+		"admin_hours":  totalAdminHours, // Include ride hours
+		"ride_hours":   rideHours,
+		"total_rides":  totalRides,
+		"total_hours":  cfiHours + totalAdminHours,
 		"cfi_hours":    cfiHours,
 		"cfi_rate":     rates.CFIRate,
 		"admin_rate":   rates.AdminRate,

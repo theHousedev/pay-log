@@ -18,9 +18,10 @@ interface FormProps {
     onFieldChange: (field: keyof Entry, value: string | number) => void;
     onFormChange: (type: EntryType) => void;
     onSubmitEntry: (event: React.FormEvent) => void;
+    entryValue?: number;
 }
 
-function Form({ input, onFieldChange, onFormChange, onSubmitEntry }: FormProps) {
+function Form({ input, onFieldChange, onFormChange, onSubmitEntry, entryValue = 0 }: FormProps) {
     return (
         <div className="flex justify-center items-center mt-1.5">
             <Card className="w-full" id="main-form"
@@ -66,6 +67,11 @@ function Form({ input, onFieldChange, onFormChange, onSubmitEntry }: FormProps) 
                         </div>
                         <div className="grid grid-cols-1 gap-2"
                             style={{ width: '25%' }}>
+                            {entryValue > 0 && (
+                                <div className="text-sm text-foreground text-center">
+                                    ${entryValue.toFixed(2)}
+                                </div>
+                            )}
                             <Button id="submit-entry" className="h-16"
                                 onClick={onSubmitEntry}
                             >Submit</Button>

@@ -80,8 +80,8 @@ func main() {
 	http.HandleFunc("/api/health", setupCheckHealth(database))
 	http.HandleFunc("/api/current-period", setupCurrentPeriod(database))
 
-	fmt.Printf("\x1b[32m"+"running on 127.0.0.1:%s"+"\x1b[0m\n", cfg.BackendPort)
+	fmt.Printf("\x1b[32m"+"running on 0.0.0.0:%s"+"\x1b[0m\n", cfg.BackendPort)
 	handler := c.Handler(http.DefaultServeMux)
 	log.Fatal(http.ListenAndServe(
-		fmt.Sprintf("127.0.0.1:%s", cfg.BackendPort), handler))
+		fmt.Sprintf("0.0.0.0:%s", cfg.BackendPort), handler))
 }

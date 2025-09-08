@@ -27,6 +27,8 @@ export interface PayPeriod {
     ground_hours: number
     sim_hours: number
     admin_hours: number
+    ride_hours?: number
+    total_rides?: number
     all_hours: number
     gross: number
     remaining: number
