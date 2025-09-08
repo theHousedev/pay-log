@@ -15,22 +15,28 @@ CREATE TABLE pay_entries (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS pay_rates (
+    id INTEGER PRIMARY KEY,
+    effective_date DATE NOT NULL,
+    cfi_rate DECIMAL(6,2) NOT NULL,
+    admin_rate DECIMAL(6,2) NOT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS pay_periods (
     id INTEGER PRIMARY KEY,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    pay_rate DECIMAL(6,2) NOT NULL,
-    admin_rate DECIMAL(6,2) NOT NULL,
-    pay_admin DECIMAL(6,2),
+    pay_date DATE NOT NULL,
     expected_pay_gross DECIMAL(8,2),
     actual_pay_gross DECIMAL(8,2),
     actual_pay_net DECIMAL(8,2),
-    -- current/past/confirmed/imported
-    status TEXT DEFAULT 'current',
+    status TEXT DEFAULT 'current',    -- current/past/confirmed/imported
     import_batch_id TEXT
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- aggregation of monthly tracking data
+
 CREATE TABLE IF NOT EXISTS monthly_stats (
     id INTEGER PRIMARY KEY,
     year INTEGER NOT NULL,

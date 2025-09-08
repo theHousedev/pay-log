@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -13,6 +14,7 @@ interface InputTypesProps {
 }
 
 export default function InputTypes({ entry, onFieldChange }: InputTypesProps) {
+    const [rideCountEnabled, setRideCountEnabled] = useState(false);
     switch (entry.type as EntryType) {
         case 'flight':
             return (
@@ -109,18 +111,21 @@ export default function InputTypes({ entry, onFieldChange }: InputTypesProps) {
                             <Label htmlFor="admin-hours" className="font-bold">Admin</Label>
                             <Input id="admin-hours" type="number" inputMode="decimal" tabIndex={2}
                                 min="0" step="0.1" placeholder="0.0"
+                                disabled={rideCountEnabled}
                                 value={entry.admin_hours ?? ''}
                                 onChange={(e) => onFieldChange('admin_hours', e.target.value)}
                             />
                         </div>
                         <div className="grid grid-cols-1 gap-5" style={{ width: '25%', justifyItems: 'center' }}>
                             <Label htmlFor="ride-count-switch" className="font-bold">Rides</Label>
-                            <Switch id="ride-count-switch" style={{ scale: '1.7' }} />
+                            <Switch id="ride-count-switch" style={{ scale: '1.7' }} checked={rideCountEnabled}
+                                onCheckedChange={(checked) => setRideCountEnabled(checked)} />
                         </div>
                         <div className="grid grid-cols-1 gap-2" style={{ width: '15%' }}>
                             <Label htmlFor="ride-count" className="font-bold">Count</Label>
-                            <Input id="ride-count" type="number" tabIndex={2}
+                            <Input id="ride-count" type="number" inputMode="numeric" tabIndex={2}
                                 min="0" step="1" placeholder="0"
+                                disabled={!rideCountEnabled}
                                 value={entry.ride_count ?? ''}
                                 onChange={(e) => onFieldChange('ride_count', e.target.value)}
                             />

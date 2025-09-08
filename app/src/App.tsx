@@ -1,10 +1,32 @@
 import { useState, useEffect } from 'react'
 
 import type { Entry, EntryType, PayPeriod } from './types'
-import Form from './components/main-form/form'
+import Form from '@/components/form'
+import CurrentCheck from '@/components/CurrentCheck'
+
+function resetForm(currentEntry: Entry): Entry {
+
+  return {
+    type: currentEntry.type,
+    date: new Date().toISOString().split('T')[0],
+    time: new Date().toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit'
+    }),
+    flight_hours: null,
+    ground_hours: null,
+    sim_hours: null,
+    admin_hours: null,
+    customer: '',
+    notes: '',
+    ride_count: null,
+    meeting: false
+  };
+}
 
 function App() {
-  const [formData, setFormData] = useState<Entry>({
+  const [entryData, setEntryData] = useState<Entry>({
     type: 'flight',
     date: new Date().toISOString().split('T')[0],
     time: new Date().toLocaleTimeString('en-US', {
@@ -23,7 +45,8 @@ function App() {
   })
 
   const [payPeriod, setPayPeriod] = useState<PayPeriod>({
-    date: '05SEP2025',
+    start: '01SEP2025',
+    end: '14SEP2025',
     flight_hours: 19.3,
     ground_hours: 13.8,
     sim_hours: 0,
@@ -32,9 +55,6 @@ function App() {
     gross: 982.73,
     remaining: 1.8
   })
-
-  // NOTE: to remove linter warning
-  payPeriod.date = "07SEP2025"
 
   const backendPort = (globalThis as any).BACKEND_PORT;
   const backendPath = `http://localhost:${backendPort}/api`;
@@ -51,44 +71,59 @@ function App() {
     }
 
     calculateRemaining()
-  }, [formData.date, formData.time])
+  }, [entryData.date, entryData.time])
 
   const handleSubmitEntry = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    console.log('Form data sent:', formData)
+    console.log('Form data sent:', entryData)
 
     try {
       const response = await fetch(`${backendPath}/new`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(entryData)
       });
       const result = await response.json();
       console.log('Backend response:', result);
     } catch (error) {
       console.error('Error: ', error);
     }
+    setEntryData(resetForm(entryData))
   };
 
   const handleFieldChange = (field: keyof Entry, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    let convertedValue: string | number | null = value;
+
+    if (field === 'flight_hours' || field === 'ground_hours' ||
+      field === 'sim_hours' || field === 'admin_hours' || field === 'ride_count') {
+      convertedValue = value === '' ? null : parseFloat(value as string);
+    }
+
+    setEntryData(prev => ({ ...prev, [field]: convertedValue }))
   }
 
   const handleFormChange = (type: EntryType) => {
-    setFormData(prev => ({ ...prev, type: type }))
+    setEntryData(resetForm(entryData))
+    setEntryData(prev => ({ ...prev, type: type }))
   }
 
   return (
     <div className="container">
       <div className="contentWrapper">
         <Form
-          input={formData}
+          input={entryData}
           onFieldChange={handleFieldChange}
           onFormChange={handleFormChange}
           onSubmitEntry={handleSubmitEntry} />
+        <CurrentCheck payPeriod={payPeriod} />
+        {/*
+          TODO: bottom of form can be conditional past 24hrs warning
+        */}
       </div>
     </div>
+    // TODO: confirmation of entry submission; possible timeout?
+    // TODO: remaining 
   )
 }
 

@@ -10,8 +10,8 @@ import { Separator } from "@/components/ui/separator"
 
 // custom imports
 import type { Entry, EntryType } from "@/types"
-import FormSelector from "./formSelector"
-import InputTypes from "./inputTypes"
+import FormSelector from "@/components/formSelector"
+import InputTypes from "@/components/inputTypes"
 
 interface FormProps {
     input: Entry;

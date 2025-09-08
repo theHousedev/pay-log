@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	db "github.com/theHousedev/pay-log/backend/database"
 )
@@ -51,5 +53,53 @@ func setupCheckHealth(database *db.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		response := database.CheckHealth()
 		toJSON(w, response)
+	}
+}
+
+func setupCurrentPeriod(database *db.Database) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Invalid method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		// Get current date
+		date := r.URL.Query().Get("date")
+		if date == "" {
+			date = time.Now().Format("2006-01-02")
+		}
+
+		// Get current pay period
+		period, err := database.GetCurrentPayPeriod(date)
+		if err != nil {
+			toJSON(w, db.Response{
+				Status:  "ERROR",
+				Message: fmt.Sprintf("Failed to get current period: %v", err),
+			})
+			return
+		}
+
+		// Calculate totals for this period
+		totals, err := database.CalculatePeriodTotals(period.ID, period.BeginDate, period.EndDate)
+		if err != nil {
+			toJSON(w, db.Response{
+				Status:  "ERROR",
+				Message: fmt.Sprintf("Failed to calculate totals: %v", err),
+			})
+			return
+		}
+
+		// Combine period and totals data
+		responseData := map[string]interface{}{
+			"period": period,
+			"totals": totals,
+		}
+
+		data, _ := json.Marshal(responseData)
+		toJSON(w, db.Response{
+			Status:  "OK",
+			Message: "Current period data retrieved",
+			Data:    data,
+		})
 	}
 }

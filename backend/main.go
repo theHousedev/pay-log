@@ -78,6 +78,7 @@ func main() {
 	http.HandleFunc("/api/edit", setupEditEntry(database))
 	http.HandleFunc("/api/delete", setupDeleteEntry(database))
 	http.HandleFunc("/api/health", setupCheckHealth(database))
+	http.HandleFunc("/api/current-period", setupCurrentPeriod(database))
 
 	fmt.Printf("\x1b[32m"+"running on 127.0.0.1:%s"+"\x1b[0m\n", cfg.BackendPort)
 	handler := c.Handler(http.DefaultServeMux)

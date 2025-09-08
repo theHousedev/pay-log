@@ -14,8 +14,15 @@ export interface Entry {
     meeting: boolean
 }
 
+export interface PayRates {
+    effective_date: string
+    cfi_rate: number
+    admin_rate: number
+}
+
 export interface PayPeriod {
-    date: string
+    start: string
+    end: string
     flight_hours: number
     ground_hours: number
     sim_hours: number

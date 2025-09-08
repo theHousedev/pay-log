@@ -25,6 +25,11 @@ func Connect(path string) (*Database, error) {
 		return nil, err
 	}
 
+	// Clean up period statuses to ensure only one current period
+	if err := database.CleanupPeriodStatuses(); err != nil {
+		return nil, fmt.Errorf("failed to cleanup period statuses: %w", err)
+	}
+
 	response := database.CheckHealth()
 	if response.Status != "OK" {
 		return nil, fmt.Errorf(

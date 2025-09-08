@@ -13,7 +13,7 @@ INSERT INTO pay_entries (
 `
 
 func (database *Database) NewEntry(entry Entry) Response {
-	fmt.Println("Creating new entry...")
+	fmt.Printf("Creating new entry... ")
 
 	result, err := database.Exec(newEntrySQL,
 		entry.Type,
@@ -29,6 +29,7 @@ func (database *Database) NewEntry(entry Entry) Response {
 		entry.Meeting,
 	)
 	if err != nil {
+		fmt.Printf("Error! %v\n", err)
 		return Response{
 			Status:  "ERROR",
 			Message: fmt.Sprintf("error creating entry: %v", err),
@@ -37,13 +38,14 @@ func (database *Database) NewEntry(entry Entry) Response {
 
 	newID, err := result.LastInsertId()
 	if err != nil {
+		fmt.Printf("Error, ID unknown! %v\n", err)
 		return Response{
 			Status:  "ERROR",
 			Message: fmt.Sprintf("created entry, ID unknown: %v", err),
 		}
 	}
 
-	fmt.Printf("new entry ID: %d\n", newID)
+	fmt.Printf("OK! Entry ID: %d\n", newID)
 	return Response{
 		Status:  "OK",
 		Message: fmt.Sprintf("new entry ID: %d", newID),
