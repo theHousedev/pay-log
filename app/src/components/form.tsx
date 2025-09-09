@@ -50,7 +50,7 @@ function MainForm({ input, onFieldChange, onFormChange, onSubmitEntry, entryValu
                         />
                         <Button id="reset-time-date" className="w-25%" onClick={() => {
                             onFieldChange('time', format(new Date(Date.now()), 'HH:mm'));
-                            onFieldChange('date', new Date().toISOString().split('T')[0]);
+                            onFieldChange('date', new Date().toLocaleDateString("en-CA"));
                         }}>Reset</Button>
                     </div>
                     <InputTypes

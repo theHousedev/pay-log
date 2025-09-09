@@ -4,7 +4,7 @@ import { useState } from "react";
 export const useEntryForm = () => {
     const [entryData, setEntryData] = useState<Entry>({
         type: 'flight',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toLocaleDateString("en-CA"),
         time: new Date().toLocaleTimeString('en-US', {
             hour12: false,
             hour: '2-digit',
