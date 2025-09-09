@@ -68,17 +68,47 @@ func (database *Database) CheckHealth() Response {
 	}
 }
 
+func (database *Database) UpdatePaycheck(check Paycheck) Response {
+	return Response{
+		Status:  "OK",
+		Message: "Paycheck updated (TODO)",
+	}
+}
+
+func (database *Database) FetchEntries(
+	beginDate string, endDate string) ([]Entry, error) {
+	query := `
+		SELECT * FROM pay_entries
+		WHERE date BETWEEN ? AND ?
+		ORDER BY date DESC, time DESC
+	`
+	entries, err := database.DB.Query(query, beginDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch entries: %w", err)
+	}
+	defer entries.Close()
+
+	var collectedEntries []Entry
+	for entries.Next() {
+		var entry Entry
+		err := entries.Scan(
+			&entry.Date, &entry.Time, &entry.FlightHours, &entry.GroundHours,
+			&entry.SimHours, &entry.AdminHours, &entry.Customer, &entry.Notes,
+			&entry.RideCount,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan entry: %w", err)
+		}
+		collectedEntries = append(collectedEntries, entry)
+	}
+
+	return collectedEntries, nil
+}
+
 func (database *Database) Close() error {
 	err := database.DB.Close()
 	if err != nil {
 		return fmt.Errorf("error closing database: %w", err)
 	}
 	return nil
-}
-
-func (database *Database) UpdatePaycheck(check Paycheck) Response {
-	return Response{
-		Status:  "OK",
-		Message: "Paycheck updated (TODO)",
-	}
 }

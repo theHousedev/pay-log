@@ -1,4 +1,5 @@
 export type EntryType = 'flight' | 'ground' | 'sim' | 'admin' | 'misc'
+export type ViewType = 'period' | 'day' | 'week' | 'all'
 
 export interface Entry {
     type: EntryType

@@ -1,13 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-import type { PayPeriod } from "@/types";
+import type { PayPeriod, ViewType } from "@/types";
+import ViewSelector from "@/components/viewSelector";
 
-interface CurrentCheckProps {
+interface DisplayProps {
     payPeriod: PayPeriod;
     isLoading?: boolean;
+    view: ViewType;
+    onViewChange: (view: ViewType) => void;
 }
 
-export default function currentCheck({ payPeriod, isLoading = false }: CurrentCheckProps) {
+export default function Display({ payPeriod, isLoading = false, view, onViewChange }: DisplayProps) {
     const formatDate = (dateStr: string) => {
         if (!dateStr) return '';
         const datePart = dateStr.split('T')[0];
@@ -36,7 +39,7 @@ export default function currentCheck({ payPeriod, isLoading = false }: CurrentCh
     }
 
     return (
-        <Card className="w-full mb-4">
+        <Card className="w-full mb-2">
             <CardHeader>
                 <CardTitle>
                     {formatDate(payPeriod.start)} - {formatDate(payPeriod.end)}
@@ -65,6 +68,7 @@ export default function currentCheck({ payPeriod, isLoading = false }: CurrentCh
                     </div>
                 </div>
             </CardContent>
+            <ViewSelector view={view} onViewChange={onViewChange} />
         </Card>
     )
 }

@@ -1,16 +1,18 @@
-import { useEffect } from 'react'
-import MainForm from '@/components/form'
+import { useEffect, useState } from 'react'
+import MainForm from '@/components/Form'
 import AuthGuard from '@/components/AuthGuard'
-import CurrentCheck from '@/components/currentCheck'
-import { usePayPeriod } from './hooks/usePayPeriod'
-import { useEntryForm } from './hooks/useEntryForm'
-import { getBackendPath } from './utils/backend'
+import Display from '@/components/Display'
+import { usePayPeriod } from '@/hooks/usePayPeriod'
+import { useEntryForm } from '@/hooks/useEntryForm'
+import { getBackendPath } from '@/utils/backend'
+import type { ViewType } from '@/types'
 
 
 function App() {
   const { entryData, resetEntryForm, handleFieldChange, handleFormChange } = useEntryForm();
   const { payPeriod, fetchPayPeriod, calculateEntryValue, refreshPayPeriod, isLoading } = usePayPeriod();
   const backendPath = getBackendPath();
+  const [view, setView] = useState<ViewType>('period');
 
   useEffect(() => {
     fetchPayPeriod();
@@ -48,8 +50,14 @@ function App() {
             onFieldChange={handleFieldChange}
             onFormChange={handleFormChange}
             onSubmitEntry={handleSubmitEntry}
-            entryValue={calculateEntryValue(entryData)} />
-          <CurrentCheck payPeriod={payPeriod} isLoading={isLoading} />
+            entryValue={calculateEntryValue(entryData)}
+          />
+          <Display
+            payPeriod={payPeriod}
+            isLoading={isLoading}
+            view={view}
+            onViewChange={setView}
+          />
           {/*
             TODO: bottom of form can be conditional past 24hrs warning
           */}

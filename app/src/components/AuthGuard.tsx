@@ -37,8 +37,13 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     }
 
     if (!isAuthenticated) {
-        return <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        return <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
             <div className="text-white">Authentication required</div>
+            <button onClick={() => {
+                window.location.href = '/api/auth/login';
+            }} className="mt-4 bg-gray-700 text-white px-4 py-2 rounded-md">
+                Retry Login
+            </button>
         </div>;
     }
 

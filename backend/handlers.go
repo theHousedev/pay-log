@@ -75,13 +75,11 @@ func setupCurrentPeriod(database *db.Database) http.HandlerFunc {
 			return
 		}
 
-		// Get current date
 		date := r.URL.Query().Get("date")
 		if date == "" {
-			date = time.Now().Format("2006-01-02")
+			date = time.Now().In(time.Local).Format("2006-01-02")
 		}
 
-		// Get current pay period
 		period, err := database.GetCurrentPayPeriod(date)
 		if err != nil {
 			toJSON(w, db.Response{
@@ -91,7 +89,6 @@ func setupCurrentPeriod(database *db.Database) http.HandlerFunc {
 			return
 		}
 
-		// Calculate totals for this period
 		totals, err := database.CalculatePeriodTotals(period.ID, period.BeginDate, period.EndDate)
 		if err != nil {
 			toJSON(w, db.Response{
@@ -101,7 +98,6 @@ func setupCurrentPeriod(database *db.Database) http.HandlerFunc {
 			return
 		}
 
-		// Combine period and totals data
 		responseData := map[string]interface{}{
 			"period": period,
 			"totals": totals,
@@ -114,4 +110,78 @@ func setupCurrentPeriod(database *db.Database) http.HandlerFunc {
 			Data:    data,
 		})
 	}
+}
+
+func setupGetEntries(database *db.Database) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Invalid method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		view := r.URL.Query().Get("view")
+		if view == "" {
+			view = "period"
+		}
+
+		date := r.URL.Query().Get("date")
+		if date == "" {
+			date = time.Now().In(time.Local).Format("2006-01-02")
+		}
+
+		var entries []db.Entry
+		var err error
+
+		switch view {
+		case "period":
+			period, err := database.GetCurrentPayPeriod(date)
+			if err != nil {
+				toJSON(w, db.Response{
+					Status:  "ERROR",
+					Message: fmt.Sprintf("Failed to get current period: %v", err),
+				})
+				return
+			}
+			entries, err = database.FetchEntries(period.BeginDate, period.EndDate)
+
+		case "day":
+			entries, err = database.FetchEntries(date, date)
+
+		case "week":
+			startOfWeek, endOfWeek := getCurrentWeek(date)
+			entries, err = database.FetchEntries(startOfWeek, endOfWeek)
+
+		case "all":
+			entries, err = database.FetchEntries("all", "all")
+
+		default:
+			toJSON(w, db.Response{
+				Status:  "ERROR",
+				Message: "Invalid view type. Use: period, day, week, or all",
+			})
+			return
+		}
+
+		if err != nil {
+			toJSON(w, db.Response{
+				Status:  "ERROR",
+				Message: fmt.Sprintf("Failed to get entries: %v", err),
+			})
+			return
+		}
+
+		data, _ := json.Marshal(entries)
+		toJSON(w, db.Response{
+			Status:  "OK",
+			Message: fmt.Sprintf("Entries retrieved for %s view", view),
+			Data:    data,
+		})
+	}
+}
+
+func getCurrentWeek(dateStr string) (string, string) {
+	date, _ := time.Parse("2006-01-02", dateStr)
+	startOfWeek := date.AddDate(0, 0, -int(date.Weekday())+1) // monday
+	endOfWeek := startOfWeek.AddDate(0, 0, 7)                 // sunday
+	return startOfWeek.Format("2006-01-02"), endOfWeek.Format("2006-01-02")
 }
