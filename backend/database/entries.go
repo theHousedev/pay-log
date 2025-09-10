@@ -41,6 +41,7 @@ func (database *Database) NewEntry(entry Entry) Response {
 		fmt.Printf("Error, ID unknown! %v\n", err)
 		return Response{
 			Status:  "ERROR",
+			
 			Message: fmt.Sprintf("created entry, ID unknown: %v", err),
 		}
 	}
@@ -59,7 +60,17 @@ func (database *Database) EditEntry() Response {
 	}
 }
 
-func (database *Database) DeleteEntry() Response {
+func (database *Database) DeleteEntry(entryID string) Response {
+	if _, err := database.Query(
+		"DELETE FROM pay_entries WHERE ID = ?", entryID)
+	if err != nil {
+		msg := fmt.Sprintf("Unable to delete entry ID=%s: %s", entryID, err)
+		return Response{
+			Status: "ERROR",
+			Message: msg,
+		}
+	}
+
 	return Response{
 		Status:  "OK",
 		Message: "Entry deleted (TODO)",
