@@ -1,18 +1,28 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-import type { PayPeriod, ViewType } from "@/types";
-import ViewSelector from "@/components/ViewSelector";
 import { formatDateRange } from "@/utils/frontend";
+import ViewSelector from "@/components/ViewSelector";
+import EntriesTable from "@/components/EntriesTable";
+import type { PayPeriod, ViewType, Entry } from "@/types";
 
 interface DisplayProps {
     payPeriod: PayPeriod;
     isLoading?: boolean;
     view: ViewType;
     onViewChange: (view: ViewType) => void;
+    entries: Entry[];
+    entriesLoading: boolean;
 }
 
-export default function Display({ payPeriod, isLoading = false, view, onViewChange }: DisplayProps) {
-    if (isLoading) {
+export default function Display({
+    payPeriod,
+    isLoading = false,
+    view,
+    onViewChange,
+    entries,
+    entriesLoading
+}: DisplayProps) {
+    if (isLoading || entriesLoading) {
         return (
             <Card className="w-full mb-4">
                 <CardHeader>
@@ -36,7 +46,7 @@ export default function Display({ payPeriod, isLoading = false, view, onViewChan
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="flex gap-4">
+                <div className="flex gap-4 mb-4">
                     <div>
                         <h3 className="font-bold mb-1" style={{ width: '75%' }}>Totals</h3>
                         <div className="space-y-0.5 mr-4">
@@ -58,6 +68,12 @@ export default function Display({ payPeriod, isLoading = false, view, onViewChan
                     </div>
                 </div>
             </CardContent>
+            <EntriesTable
+                entries={entries}
+                isLoading={entriesLoading}
+                onDeleteEntry={(id) => console.log('Delete entry:', id)}
+            />
         </Card>
+
     )
 }

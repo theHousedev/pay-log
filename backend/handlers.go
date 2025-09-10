@@ -182,6 +182,6 @@ func setupGetEntries(database *db.Database) http.HandlerFunc {
 func getCurrentWeek(dateStr string) (string, string) {
 	date, _ := time.Parse("2006-01-02", dateStr)
 	startOfWeek := date.AddDate(0, 0, -int(date.Weekday())+1) // monday
-	endOfWeek := startOfWeek.AddDate(0, 0, 7)                 // sunday
+	endOfWeek := startOfWeek.AddDate(0, 0, 6)                 // sunday
 	return startOfWeek.Format("2006-01-02"), endOfWeek.Format("2006-01-02")
 }

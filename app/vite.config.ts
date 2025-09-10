@@ -20,9 +20,13 @@ function getConfig() {
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    port: parseInt(getConfig().frontend_port),
     host: '0.0.0.0',
+    port: parseInt(getConfig().frontend_port),
     allowedHosts: ['pay.khouse.dev', 'localhost', '127.0.0.1'],
+    hmr: {
+      host: 'pay.khouse.dev',
+      port: parseInt(getConfig().frontend_port),
+    }
   },
   resolve: {
     alias: {

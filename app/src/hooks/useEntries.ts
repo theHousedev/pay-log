@@ -13,12 +13,11 @@ export const useEntries = () => {
             const params = new URLSearchParams({ view });
             if (date) params.append('date', date);
 
-            const response = await fetch(`${apiPath}/entries?${params}`);
+            const response = await fetch(`${apiPath}/get-entries?${params}`);
             const result = await response.json();
 
             if (result.status === 'OK' && result.data) {
-                const entriesData = JSON.parse(result.data);
-                setEntries(entriesData);
+                setEntries(result.data);
             }
         } catch (error) {
             console.error('Error fetching entries:', error);

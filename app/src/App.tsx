@@ -1,31 +1,37 @@
 import { useEffect, useState } from 'react'
 import MainForm from '@/components/Form'
 import AuthGuard from '@/components/AuthGuard'
-import Display from '@/components/Display'
+import { useEntries } from '@/hooks/useEntries'
 import { usePayPeriod } from '@/hooks/usePayPeriod'
 import { useEntryForm } from '@/hooks/useEntryForm'
-import { getBackendPath } from '@/utils/backend'
+import { getAPIPath } from '@/utils/backend'
 import type { ViewType } from '@/types'
 
 
 function App() {
   const { entryData, resetEntryForm, handleFieldChange, handleFormChange } = useEntryForm();
   const { payPeriod, fetchPayPeriod, calculateEntryValue, refreshPayPeriod, isLoading } = usePayPeriod();
-  const backendPath = getBackendPath();
+  const { entries, fetchEntries, isLoading: entriesLoading } = useEntries();
+  const apiPath = getAPIPath();
   const [view, setView] = useState<ViewType>('period');
 
   useEffect(() => {
     fetchPayPeriod();
+    fetchEntries('period');
   }, []);
 
   const handleSubmitEntry = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log('Form data sent:', entryData)
+
+    // Create a copy without the ID field
+    const { id, ...entryDataWithoutId } = entryData;
+
+    console.log('Form data sent:', entryDataWithoutId);
     try {
-      const response = await fetch(`${backendPath}/new`, {
+      const response = await fetch(`${apiPath}/new`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(entryData)
+        body: JSON.stringify(entryDataWithoutId)
       });
       const result = await response.json();
       console.log('Backend response:', result);
@@ -41,6 +47,11 @@ function App() {
     resetEntryForm(entryData);
   };
 
+  const handleViewChange = (newView: ViewType) => {
+    setView(newView)
+    fetchEntries(newView);
+  }
+
   return (
     <AuthGuard>
       <div className="container">
@@ -51,22 +62,15 @@ function App() {
             onFormChange={handleFormChange}
             onSubmitEntry={handleSubmitEntry}
             entryValue={calculateEntryValue(entryData)}
-          />
-          <Display
             payPeriod={payPeriod}
             isLoading={isLoading}
             view={view}
-            onViewChange={setView}
+            onViewChange={handleViewChange}
+            entries={entries}
+            entriesLoading={entriesLoading}
           />
-          {/*
-            TODO: bottom of form can be conditional past 24hrs warning
-          */}
         </div>
       </div>
-      {/* 
-        TODO: confirmation of entry submission; possible timeout?
-        TODO: remaining hours in 24hr period
-      */}
     </AuthGuard>
   )
 }

@@ -75,26 +75,36 @@ func (database *Database) UpdatePaycheck(check Paycheck) Response {
 	}
 }
 
-func (database *Database) FetchEntries(
-	beginDate string, endDate string) ([]Entry, error) {
+func (database *Database) FetchEntries(beginDate string, endDate string) ([]Entry, error) {
 	query := `
-		SELECT * FROM pay_entries
-		WHERE date BETWEEN ? AND ?
-		ORDER BY date DESC, time DESC
-	`
-	entries, err := database.DB.Query(query, beginDate, endDate)
+        SELECT id, type, date, time, flight_hours, ground_hours, sim_hours, 
+               admin_hours, customer, notes, ride_count, meeting
+        FROM pay_entries 
+    `
+
+	var args []interface{}
+
+	if beginDate != "all" && endDate != "all" {
+		query += "WHERE date BETWEEN ? AND ?"
+		args = []interface{}{beginDate, endDate}
+	}
+
+	query += "ORDER BY date DESC, time DESC"
+
+	rows, err := database.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch entries: %w", err)
 	}
-	defer entries.Close()
+	defer rows.Close()
 
 	var collectedEntries []Entry
-	for entries.Next() {
+	for rows.Next() {
 		var entry Entry
-		err := entries.Scan(
-			&entry.Date, &entry.Time, &entry.FlightHours, &entry.GroundHours,
-			&entry.SimHours, &entry.AdminHours, &entry.Customer, &entry.Notes,
-			&entry.RideCount,
+		err := rows.Scan(
+			&entry.ID, &entry.Type, &entry.Date, &entry.Time,
+			&entry.FlightHours, &entry.GroundHours, &entry.SimHours,
+			&entry.AdminHours, &entry.Customer, &entry.Notes,
+			&entry.RideCount, &entry.Meeting,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan entry: %w", err)

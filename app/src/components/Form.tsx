@@ -9,9 +9,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
 // custom imports
-import type { Entry, EntryType } from "@/types"
+import type { Entry, EntryType, PayPeriod, ViewType } from "@/types"
 import FormSelector from "@/components/FormSelector"
 import InputTypes from "@/components/inputTypes"
+import Display from "./Display"
 
 interface FormProps {
     input: Entry;
@@ -19,15 +20,31 @@ interface FormProps {
     onFormChange: (type: EntryType) => void;
     onSubmitEntry: (event: React.FormEvent) => void;
     entryValue?: number;
+    payPeriod: PayPeriod;
+    isLoading: boolean;
+    view: ViewType;
+    onViewChange: (view: ViewType) => void;
+    entries: Entry[];
+    entriesLoading: boolean;
 }
 
-function MainForm({ input, onFieldChange, onFormChange, onSubmitEntry, entryValue = 0 }: FormProps) {
+function MainForm({
+    input,
+    onFieldChange,
+    onFormChange,
+    onSubmitEntry,
+    entryValue = 0,
+    payPeriod,
+    isLoading,
+    view,
+    onViewChange,
+    entries,
+    entriesLoading }: FormProps) {
     return (
         <div className="flex justify-center items-center mt-1.5">
             <Card className="w-full" id="main-form"
                 style={{
-                    width: '98%',
-                    border: 'none',
+                    width: '100%',
                     padding: '2px',
                     borderRadius: '21px',
                 }}>
@@ -78,6 +95,14 @@ function MainForm({ input, onFieldChange, onFormChange, onSubmitEntry, entryValu
                         </div>
                     </div>
                 </CardContent>
+                <Display
+                    payPeriod={payPeriod}
+                    isLoading={isLoading}
+                    view={view}
+                    onViewChange={onViewChange}
+                    entries={entries}
+                    entriesLoading={entriesLoading}
+                />
             </Card >
         </div>
     )

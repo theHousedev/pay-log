@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 
 import type { Entry, PayPeriod } from "@/types";
-import { getBackendPath } from "@/utils/backend";
+import { getAPIPath } from "@/utils/backend";
 
 export const usePayPeriod = () => {
     const [payPeriod, setPayPeriod] = useState<PayPeriod>({
@@ -19,7 +19,7 @@ export const usePayPeriod = () => {
     const [currentRates, setCurrentRates] = useState({ cfi_rate: 26.50, admin_rate: 13.75 })
     const [isLoading, setIsLoading] = useState(true);
     const hasFetched = useRef(false)
-    const backendPath = getBackendPath();
+    const apiPath = getAPIPath();
 
     const calculateEntryValue = (entry: Entry): number => {
         const cfiHours = (entry.flight_hours || 0) + (entry.ground_hours || 0) + (entry.sim_hours || 0);
@@ -44,7 +44,7 @@ export const usePayPeriod = () => {
 
         hasFetched.current = true;
         try {
-            const response = await fetch(`${backendPath}/current-period`);
+            const response = await fetch(`${apiPath}/current-period`);
             const result = await response.json();
 
             if (result.status === 'OK' && result.data) {
