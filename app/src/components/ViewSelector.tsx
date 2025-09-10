@@ -15,7 +15,7 @@ export default function ViewSelector({ view, onViewChange }: ViewTypeProps) {
                 display: 'flex',
                 height: '20px',
                 flexDirection: 'row',
-                gap: '4px',
+                gap: '1px',
                 marginBottom: '5px',
                 marginTop: '0px',
                 justifyContent: 'center'
@@ -24,7 +24,8 @@ export default function ViewSelector({ view, onViewChange }: ViewTypeProps) {
                 <Button
                     key={type}
                     style={{
-                        height: '25px'
+                        height: '30px',
+                        width: '60px'
                     }}
                     variant={view === type ? "default" : "outline"}
                     className={view === type ? "opacity-75" : "opacity-50"}

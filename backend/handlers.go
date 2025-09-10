@@ -49,14 +49,14 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 
 func setupEditEntry(database *db.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		response := database.EditEntry()
+		response := database.EditEntry(r.URL.Query().Get("id"))
 		toJSON(w, response)
 	}
 }
 
 func setupDeleteEntry(database *db.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		response := database.DeleteEntry()
+		response := database.DeleteEntry(r.URL.Query().Get("id"))
 		toJSON(w, response)
 	}
 }

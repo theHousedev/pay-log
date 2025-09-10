@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 import type { PayPeriod, ViewType } from "@/types";
-import ViewSelector from "@/components/viewSelector";
+import ViewSelector from "@/components/ViewSelector";
+import { formatDateRange } from "@/utils/frontend";
 
 interface DisplayProps {
     payPeriod: PayPeriod;
@@ -11,18 +12,6 @@ interface DisplayProps {
 }
 
 export default function Display({ payPeriod, isLoading = false, view, onViewChange }: DisplayProps) {
-    const formatDate = (dateStr: string) => {
-        if (!dateStr) return '';
-        const datePart = dateStr.split('T')[0];
-        const [year, month, day] = datePart.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
-    };
-
     if (isLoading) {
         return (
             <Card className="w-full mb-4">
@@ -39,10 +28,11 @@ export default function Display({ payPeriod, isLoading = false, view, onViewChan
     }
 
     return (
-        <Card className="w-full mb-2">
+        <Card className="w-full mb-1 gap-1">
             <CardHeader>
-                <CardTitle>
-                    {formatDate(payPeriod.start)} - {formatDate(payPeriod.end)}
+                <CardTitle className="flex items-center gap-3 whitespace-pre-line">
+                    <ViewSelector view={view} onViewChange={onViewChange} />
+                    {formatDateRange(payPeriod.start, payPeriod.end)}
                 </CardTitle>
             </CardHeader>
             <CardContent>
@@ -50,16 +40,16 @@ export default function Display({ payPeriod, isLoading = false, view, onViewChan
                     <div>
                         <h3 className="font-bold mb-1" style={{ width: '75%' }}>Totals</h3>
                         <div className="space-y-0.5 mr-4">
-                            <div>Flight {payPeriod.flight_hours.toFixed(1)}hrs</div>
-                            <div>Ground {payPeriod.ground_hours.toFixed(1)}hrs</div>
-                            <div>Sim {payPeriod.sim_hours.toFixed(1)}hrs</div>
-                            <div>Admin {payPeriod.admin_hours.toFixed(1)}hrs</div>
+                            <div>F: {payPeriod.flight_hours.toFixed(1)}</div>
+                            <div>G: {payPeriod.ground_hours.toFixed(1)}</div>
+                            <div>S: {payPeriod.sim_hours.toFixed(1)}</div>
+                            <div>A: {payPeriod.admin_hours.toFixed(1)}</div>
                         </div>
                     </div>
                     <div>
                         <div className="space-y-0.5">
                             <div className="font-bold">Earned</div>
-                            <div>Hours: {payPeriod.all_hours.toFixed(1)}h</div>
+                            <div>Hours: {payPeriod.all_hours.toFixed(1)}</div>
                             <div>Gross: ${payPeriod.gross.toFixed(2)}</div>
                             {payPeriod.remaining > 0 && (
                                 <div>Remaining: {payPeriod.remaining.toFixed(1)}h</div>
@@ -68,7 +58,6 @@ export default function Display({ payPeriod, isLoading = false, view, onViewChan
                     </div>
                 </div>
             </CardContent>
-            <ViewSelector view={view} onViewChange={onViewChange} />
         </Card>
     )
 }

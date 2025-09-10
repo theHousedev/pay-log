@@ -10,3 +10,8 @@ export const getBackendPath = (): string => {
         return `http://${backendHost}:${backendPort}/api`;
     }
 };
+
+export const getAPIPath = (): string => {
+    const backendPath = getBackendPath();
+    return `${backendPath}/api`;
+};

@@ -3,6 +3,7 @@ import { useState } from "react";
 
 export const useEntryForm = () => {
     const [entryData, setEntryData] = useState<Entry>({
+        id: '',
         type: 'flight',
         date: new Date().toLocaleDateString("en-CA"),
         time: new Date().toLocaleTimeString('en-US', {
@@ -22,6 +23,7 @@ export const useEntryForm = () => {
 
     const resetEntryForm = (currentEntry: Entry): Entry => {
         return {
+            id: currentEntry.id,
             type: currentEntry.type,
             date: currentEntry.date,
             time: currentEntry.time,
@@ -48,7 +50,15 @@ export const useEntryForm = () => {
     }
 
     const handleFormChange = (type: EntryType) => {
-        setEntryData(prev => ({ ...prev, type: type }))
+        setEntryData(prev => ({
+            ...prev,
+            type: type,
+            flight_hours: null,
+            ground_hours: null,
+            sim_hours: null,
+            admin_hours: null,
+            ride_count: null
+        }));
     }
 
     return { entryData, resetEntryForm, handleFieldChange, handleFormChange }
