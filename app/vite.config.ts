@@ -23,10 +23,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: parseInt(getConfig().frontend_port),
     allowedHosts: ['pay.khouse.dev', 'localhost', '127.0.0.1'],
-    hmr: {
-      host: 'pay.khouse.dev',
-      port: parseInt(getConfig().frontend_port),
-    }
+    hmr: false
   },
   resolve: {
     alias: {

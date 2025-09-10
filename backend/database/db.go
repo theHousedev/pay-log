@@ -112,6 +112,10 @@ func (database *Database) FetchEntries(beginDate string, endDate string) ([]Entr
 		collectedEntries = append(collectedEntries, entry)
 	}
 
+	if collectedEntries == nil {
+		collectedEntries = []Entry{}
+	}
+
 	return collectedEntries, nil
 }
 

@@ -26,6 +26,7 @@ interface FormProps {
     onViewChange: (view: ViewType) => void;
     entries: Entry[];
     entriesLoading: boolean;
+    onDeleteEntry: (id: number) => void;
 }
 
 function MainForm({
@@ -39,7 +40,8 @@ function MainForm({
     view,
     onViewChange,
     entries,
-    entriesLoading }: FormProps) {
+    entriesLoading,
+    onDeleteEntry }: FormProps) {
     return (
         <div className="flex justify-center items-center mt-1.5">
             <Card className="w-full" id="main-form"
@@ -102,6 +104,7 @@ function MainForm({
                     onViewChange={onViewChange}
                     entries={entries}
                     entriesLoading={entriesLoading}
+                    onDeleteEntry={onDeleteEntry}
                 />
             </Card >
         </div>

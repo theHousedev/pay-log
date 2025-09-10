@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -42,36 +43,46 @@ func (database *Database) NewEntry(entry Entry) Response {
 		return Response{
 			Status: "ERROR",
 
-			Message: fmt.Sprintf("created entry, ID unknown: %v", err),
+			Message: fmt.Sprintf("created entry, ID error: %v", err),
 		}
 	}
 
 	fmt.Printf("OK - Entry ID: %d\n", newID)
 	return Response{
 		Status:  "OK",
-		Message: fmt.Sprintf("new entry ID: %d", newID),
+		Message: "New entry created:",
+		Data:    json.RawMessage(fmt.Sprintf(`{"entry_id": %d}`, newID)),
 	}
 }
 
 func (database *Database) EditEntry(id string) Response {
 	return Response{
 		Status:  "OK",
-		Message: fmt.Sprintf("Edited entry ID=%s", id),
+		Message: "Edited entry:",
+		Data:    json.RawMessage(fmt.Sprintf(`{"entry_id": %s}`, id)),
 	}
 }
 
 func (database *Database) DeleteEntry(id string) Response {
-	if _, err := database.Query(fmt.Sprintf("DELETE FROM pay_entries WHERE ID = %s", id)); err != nil {
+	fmt.Printf("Delete call for ID: %s\n", id)
+
+	query := "DELETE FROM pay_entries WHERE id = ?"
+	_, err := database.Exec(query, id)
+	if err != nil {
 		msg := fmt.Sprintf("Unable to delete entry ID=%s: %s", id, err)
+		fmt.Printf("Delete error: %s\n", msg)
 		return Response{
 			Status:  "ERROR",
 			Message: msg,
 		}
 	}
 
+	fmt.Printf("Deleted ID: %s\n", id)
+
 	return Response{
 		Status:  "OK",
-		Message: fmt.Sprintf("Entry ID=%s deleted", id),
+		Message: "Entry deleted:",
+		Data:    json.RawMessage(fmt.Sprintf(`{"entry_id": %s}`, id)),
 	}
 }
 

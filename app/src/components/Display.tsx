@@ -12,6 +12,7 @@ interface DisplayProps {
     onViewChange: (view: ViewType) => void;
     entries: Entry[];
     entriesLoading: boolean;
+    onDeleteEntry: (id: number) => void;
 }
 
 export default function Display({
@@ -20,7 +21,8 @@ export default function Display({
     view,
     onViewChange,
     entries,
-    entriesLoading
+    entriesLoading,
+    onDeleteEntry
 }: DisplayProps) {
     if (isLoading || entriesLoading) {
         return (
@@ -71,7 +73,7 @@ export default function Display({
             <EntriesTable
                 entries={entries}
                 isLoading={entriesLoading}
-                onDeleteEntry={(id) => console.log('Delete entry:', id)}
+                onDeleteEntry={onDeleteEntry}
             />
         </Card>
 

@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Entry } from "@/types";
-import { format } from "date-fns";
 
 interface EntriesTableProps {
     entries: Entry[];
@@ -17,15 +16,12 @@ export default function EntriesTable({ entries, isLoading, onDeleteEntry }: Entr
     };
 
     const fmtHours = (hours: number | null) => {
-        if (hours === null || hours === undefined) return '-';
+        if (hours === null || hours === undefined) return '';
         return hours.toFixed(1);
     };
 
     const fmtDate = (dateStr: string) => {
         if (!dateStr) return '';
-        //     const date = new Date(dateStr);
-        //     return `${format(date, 'dd')}${format(date, 'MMM')}`;
-        // };
         const datePart = dateStr.split('T')[0]; // Gets "2025-09-09"
         const [year, month, day] = datePart.split('-').map(Number);
         const date = new Date(year, month - 1, day); // month is 0-indexed
@@ -37,7 +33,7 @@ export default function EntriesTable({ entries, isLoading, onDeleteEntry }: Entr
     };
 
     const fmtName = (fullName: string | null) => {
-        if (!fullName || fullName.trim() === '') return '-';
+        if (!fullName || fullName.trim() === '') return '';
         const parts = fullName.trim().split(' ');
         return parts[parts.length - 1];
     };
@@ -59,7 +55,7 @@ export default function EntriesTable({ entries, isLoading, onDeleteEntry }: Entr
             <Card className="w-full mb-4">
                 <CardContent className="p-0">
                     <div className="text-center text-muted-foreground">
-                        No entries for this period.
+                        No entries found in selected range.
                     </div>
                 </CardContent>
             </Card>
@@ -82,7 +78,7 @@ export default function EntriesTable({ entries, isLoading, onDeleteEntry }: Entr
                                 <th className="text-left p-0 md:table-cell">S</th>
                                 <th className="text-left p-0 md:table-cell">A</th>
                                 <th className="text-left p-1 sm:table-cell">Customer</th>
-                                <th className="text-left p-0 sm:table-cell">Rides</th>
+                                <th className="text-right p-0 sm:table-cell">Rides</th>
                                 <th className="text-left p-1 hidden lg:table-cell">Notes</th>
                                 <th className="text-right p-1"></th>
                             </tr>
@@ -101,8 +97,8 @@ export default function EntriesTable({ entries, isLoading, onDeleteEntry }: Entr
                                     <td className="p-1 md:table-cell">{fmtHours(entry.sim_hours)}</td>
                                     <td className="p-1 md:table-cell">{fmtHours(entry.admin_hours)}</td>
                                     <td className="p-1 sm:table-cell">{fmtName(entry.customer)}</td>
-                                    <td className="p-0 sm:table-cell">{entry.ride_count}</td>
-                                    <td className="p-1 hidden lg:table-cell max-w-xs truncate">{entry.notes || '-'}</td>
+                                    <td className="p-2 text-right sm:table-cell">{entry.ride_count}</td>
+                                    <td className="p-1 hidden lg:table-cell max-w-xs truncate">{entry.notes || ''}</td>
                                     <td className="p-1 xs:table-cell xs:text-right">
                                         <Button variant="destructive" size="icon" onClick={() => onDeleteEntry(Number(entry.id))}>
                                             ❌

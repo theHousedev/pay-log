@@ -15,7 +15,6 @@ export const useEntries = () => {
 
             const response = await fetch(`${apiPath}/get-entries?${params}`);
             const result = await response.json();
-
             if (result.status === 'OK' && result.data) {
                 setEntries(result.data);
             }

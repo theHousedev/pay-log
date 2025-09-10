@@ -22,11 +22,8 @@ function App() {
 
   const handleSubmitEntry = async (event: React.FormEvent) => {
     event.preventDefault();
-
-    // Create a copy without the ID field
     const { id, ...entryDataWithoutId } = entryData;
 
-    console.log('Form data sent:', entryDataWithoutId);
     try {
       const response = await fetch(`${apiPath}/new`, {
         method: 'POST',
@@ -34,10 +31,10 @@ function App() {
         body: JSON.stringify(entryDataWithoutId)
       });
       const result = await response.json();
-      console.log('Backend response:', result);
 
       if (result.status === 'OK') {
-        console.log('Entry submitted successfully');
+        console.log(result.message, result.data.entry_id);
+        await fetchEntries(view);
         await refreshPayPeriod();
       }
     } catch (error) {
@@ -50,6 +47,33 @@ function App() {
   const handleViewChange = (newView: ViewType) => {
     setView(newView)
     fetchEntries(newView);
+  }
+
+  const handleDeleteEntry = async (id: number) => {
+    const confirmed = window.confirm('Confirm deletion of entry');
+    if (!confirmed) return;
+    deleteAsync(id);
+  }
+
+  const deleteAsync = async (id: number) => {
+    try {
+      const response = await fetch(`${apiPath}/delete?id=${id}`, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'OK') {
+        console.log(result.message, result.data.entry_id);
+        await fetchEntries(view);
+        await refreshPayPeriod();
+      } else {
+        alert(`Failed to delete entry: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      alert('Failed to delete entry. Please try again.');
+    }
   }
 
   return (
@@ -68,6 +92,7 @@ function App() {
             onViewChange={handleViewChange}
             entries={entries}
             entriesLoading={entriesLoading}
+            onDeleteEntry={handleDeleteEntry}
           />
         </div>
       </div>
