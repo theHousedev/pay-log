@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	db "github.com/theHousedev/pay-log/backend/database"
 	"go.yaml.in/yaml/v3"
@@ -52,6 +53,11 @@ func openDB(dbPath string) *db.Database {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env")
+	}
+
 	dbPath := "./pay_log.db"
 	database := openDB(dbPath)
 	defer database.Close()
@@ -74,6 +80,7 @@ func main() {
 		AllowedHeaders: []string{"Content-Type"},
 	})
 
+	http.HandleFunc("/api/login", setupLogin())
 	http.HandleFunc("/api/new", auth(setupNewEntry(database)))
 	http.HandleFunc("/api/edit", auth(setupEditEntry(database)))
 	http.HandleFunc("/api/delete", auth(setupDeleteEntry(database)))

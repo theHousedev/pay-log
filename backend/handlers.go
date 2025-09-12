@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	db "github.com/theHousedev/pay-log/backend/database"
@@ -37,13 +38,49 @@ func setupNewEntry(database *db.Database) http.HandlerFunc {
 
 func auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		username, password, ok := r.BasicAuth()
-		if !ok || username != "kh" || password != "369636" {
-			w.Header().Set("WWW-Authenticate", `Basic realm="Pay Log Access"`)
-			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		cookie, err := r.Cookie("session_id")
+		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
+
+		if !validateSession(cookie.Value) {
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			return
+		}
+
 		next(w, r)
+	}
+}
+
+func getCredentials() (string, string) {
+	return os.Getenv("PAYUN"), os.Getenv("PAYPS")
+}
+
+func setupLogin() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		uname, pw := getCredentials()
+
+		if r.Method == "POST" {
+			usernameInput := r.FormValue("username")
+			passwordInput := r.FormValue("password")
+			if usernameInput == uname && passwordInput == pw {
+				session := createSession(usernameInput) // success cookie
+				http.SetCookie(w, &http.Cookie{
+					Name:     "session_id",
+					Value:    session.ID,
+					Expires:  time.Now().Add(SessionDuration),
+					HttpOnly: true,
+					Secure:   true,
+					SameSite: http.SameSiteStrictMode,
+				})
+				http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			} else {
+				http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			}
+		} else {
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+		}
 	}
 }
 
