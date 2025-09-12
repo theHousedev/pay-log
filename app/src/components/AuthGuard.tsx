@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getAPIPath } from '@/utils/backend';
 
 interface AuthGuardProps {
     children: React.ReactNode;
@@ -7,18 +9,26 @@ interface AuthGuardProps {
 export default function AuthGuard({ children }: AuthGuardProps) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         checkAuth();
     }, []);
 
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            navigate('/login');
+        }
+    }, [isLoading, isAuthenticated, navigate]);
+
     const checkAuth = async () => {
         try {
-            const response = await fetch('/api/health', {
+            const url = `${getAPIPath()}/auth-ok`;
+            const response = await fetch(url, {
                 credentials: 'include'
             });
 
-            if (response.ok) {
+            if (response.status === 200) {
                 setIsAuthenticated(true);
             } else {
                 setIsAuthenticated(false);
@@ -37,14 +47,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     }
 
     if (!isAuthenticated) {
-        return <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900">
-            <div className="text-white">Authentication required</div>
-            <button onClick={() => {
-                window.location.href = '/api/auth/login';
-            }} className="mt-4 bg-gray-700 text-white px-4 py-2 rounded-md">
-                Retry Login
-            </button>
-        </div>;
+        return null; // Don't render anything while redirecting
     }
 
     return <>{children}</>;

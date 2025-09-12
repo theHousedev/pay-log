@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+
 import MainForm from '@/components/Form'
 import AuthGuard from '@/components/AuthGuard'
+import LoginForm from '@/components/LoginForm'
 import { useEntries } from '@/hooks/useEntries'
 import { usePayPeriod } from '@/hooks/usePayPeriod'
 import { useEntryForm } from '@/hooks/useEntryForm'
@@ -76,27 +79,35 @@ function App() {
     }
   }
 
+  function App() {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={
+            <AuthGuard>
+              <MainForm
+                input={entryData}
+                onFieldChange={handleFieldChange}
+                onFormChange={handleFormChange}
+                onSubmitEntry={handleSubmitEntry}
+                entryValue={calculateEntryValue(entryData)}
+                payPeriod={payPeriod}
+                isLoading={isLoading}
+                view={view}
+                onViewChange={handleViewChange}
+                entries={entries}
+                entriesLoading={entriesLoading}
+                onDeleteEntry={handleDeleteEntry}
+              />
+            </AuthGuard>} />
+          <Route path="/login" element={<LoginForm />} />
+        </Routes>
+      </BrowserRouter>
+    )
+  }
+
   return (
-    <AuthGuard>
-      <div className="container">
-        <div className="contentWrapper">
-          <MainForm
-            input={entryData}
-            onFieldChange={handleFieldChange}
-            onFormChange={handleFormChange}
-            onSubmitEntry={handleSubmitEntry}
-            entryValue={calculateEntryValue(entryData)}
-            payPeriod={payPeriod}
-            isLoading={isLoading}
-            view={view}
-            onViewChange={handleViewChange}
-            entries={entries}
-            entriesLoading={entriesLoading}
-            onDeleteEntry={handleDeleteEntry}
-          />
-        </div>
-      </div>
-    </AuthGuard>
+    <App />
   )
 }
 

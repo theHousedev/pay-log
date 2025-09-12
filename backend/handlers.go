@@ -36,6 +36,14 @@ func setupNewEntry(database *db.Database) http.HandlerFunc {
 	}
 }
 
+func setupAuthOK() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status": "authenticated"}`))
+	}
+}
+
 func auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session_id")
@@ -65,7 +73,7 @@ func setupLogin() http.HandlerFunc {
 			usernameInput := r.FormValue("username")
 			passwordInput := r.FormValue("password")
 			if usernameInput == uname && passwordInput == pw {
-				session := createSession(usernameInput) // success cookie
+				session := createSession(usernameInput)
 				http.SetCookie(w, &http.Cookie{
 					Name:     "session_id",
 					Value:    session.ID,
@@ -74,12 +82,16 @@ func setupLogin() http.HandlerFunc {
 					Secure:   true,
 					SameSite: http.SameSiteStrictMode,
 				})
-				http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status": "success", "redirect": "/"}`))
 			} else {
-				http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`{"status": "error", "message": "Invalid credentials"}`))
 			}
 		} else {
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
 	}
 }
