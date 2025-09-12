@@ -10,7 +10,6 @@ import { useEntryForm } from '@/hooks/useEntryForm'
 import { getAPIPath } from '@/utils/backend'
 import type { ViewType } from '@/types'
 
-
 function App() {
   const { entryData, resetEntryForm, handleFieldChange, handleFormChange } = useEntryForm();
   const { payPeriod, fetchPayPeriod, calculateEntryValue, refreshPayPeriod, isLoading } = usePayPeriod();
@@ -79,35 +78,29 @@ function App() {
     }
   }
 
-  function App() {
-    return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={
-            <AuthGuard>
-              <MainForm
-                input={entryData}
-                onFieldChange={handleFieldChange}
-                onFormChange={handleFormChange}
-                onSubmitEntry={handleSubmitEntry}
-                entryValue={calculateEntryValue(entryData)}
-                payPeriod={payPeriod}
-                isLoading={isLoading}
-                view={view}
-                onViewChange={handleViewChange}
-                entries={entries}
-                entriesLoading={entriesLoading}
-                onDeleteEntry={handleDeleteEntry}
-              />
-            </AuthGuard>} />
-          <Route path="/login" element={<LoginForm />} />
-        </Routes>
-      </BrowserRouter>
-    )
-  }
-
   return (
-    <App />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={
+          <AuthGuard>
+            <MainForm
+              input={entryData}
+              onFieldChange={handleFieldChange}
+              onFormChange={handleFormChange}
+              onSubmitEntry={handleSubmitEntry}
+              entryValue={calculateEntryValue(entryData)}
+              payPeriod={payPeriod}
+              isLoading={isLoading}
+              view={view}
+              onViewChange={handleViewChange}
+              entries={entries}
+              entriesLoading={entriesLoading}
+              onDeleteEntry={handleDeleteEntry}
+            />
+          </AuthGuard>} />
+        <Route path="/login" element={<LoginForm />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
