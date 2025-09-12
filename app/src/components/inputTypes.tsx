@@ -119,7 +119,14 @@ export default function InputTypes({ entry, onFieldChange }: InputTypesProps) {
                         <div className="grid grid-cols-1 gap-5" style={{ width: '25%', justifyItems: 'center' }}>
                             <Label htmlFor="ride-count-switch" className="font-bold">Rides</Label>
                             <Switch id="ride-count-switch" style={{ scale: '1.7' }} checked={rideCountEnabled}
-                                onCheckedChange={(checked) => setRideCountEnabled(checked)} />
+                                onCheckedChange={(checked) => {
+                                    setRideCountEnabled(checked);
+                                    if (checked) {
+                                        onFieldChange('ride_count', '');
+                                    } else {
+                                        onFieldChange('admin_hours', '');
+                                    }
+                                }} />
                         </div>
                         <div className="grid grid-cols-1 gap-2" style={{ width: '15%' }}>
                             <Label htmlFor="ride-count" className="font-bold">Count</Label>
@@ -127,7 +134,15 @@ export default function InputTypes({ entry, onFieldChange }: InputTypesProps) {
                                 min="0" step="1" placeholder="0"
                                 disabled={!rideCountEnabled}
                                 value={entry.ride_count ?? ''}
-                                onChange={(e) => onFieldChange('ride_count', e.target.value)}
+                                onChange={(e) => {
+                                    const rideCount = parseInt(e.target.value) || 0;
+                                    onFieldChange('ride_count', rideCount);
+                                    if (rideCountEnabled) {
+                                        onFieldChange('admin_hours', (rideCount * 0.2).toFixed(1));
+                                    } else {
+                                        onFieldChange('admin_hours', '');
+                                    }
+                                }}
                             />
                         </div>
 
