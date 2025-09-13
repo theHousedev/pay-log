@@ -6,20 +6,30 @@ export const formatDateRange = (startDate: string, endDate: string) => {
     };
 
     const start = parseDate(startDate);
+    const startMonth = start.getMonth();
     const startYear = start.getFullYear();
     const end = parseDate(endDate);
+    const endMonth = end.getMonth();
     const endYear = end.getFullYear();
 
     if (startYear === endYear) {
-        return fmtDate('s', start) + ' -\n\n' + fmtDate('s', end) + startYear;
+        if (startMonth === endMonth) {
+            return fmtDate('dd', start) + ' - ' +
+                fmtDate('ddmmm', end) + startYear;
+        }
+        return fmtDate('dd', start) + startMonth + ' - ' +
+            fmtDate('ddmmm', end) + endYear;
     }
-    return fmtDate('s', start) + startYear + ' -\n\n' + fmtDate('s', end) + endYear;
+    return fmtDate('dd', start) + startMonth + startYear +
+        ' - ' + fmtDate('ddmmm', end) + endYear;
 };
 
 export const fmtDate = (format: string, date: Date) => {
     const day = date.getDate().toString().padStart(2, '0');
     switch (format) {
-        case 's':
+        case 'dd':
+            return `${day}`;
+        case 'ddmmm':
             return `${day}${date.toLocaleDateString(
                 'en-US', { month: 'short' }).toUpperCase()}`;
         default:

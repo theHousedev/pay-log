@@ -44,13 +44,13 @@ export default function Display({
             <CardHeader>
                 <CardTitle className="flex items-center gap-3 whitespace-pre-line">
                     <ViewSelector view={view} onViewChange={onViewChange} />
-                    {formatDateRange(payPeriod.start, payPeriod.end)}
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="flex gap-4 mb-4">
+                <div className="mb-0">{formatDateRange(payPeriod.start, payPeriod.end)}</div>
+                <div className="flex gap-4 mb-4" style={{ fontSize: '0.8rem' }}>
                     <div>
-                        <h3 className="font-bold mb-1" style={{ width: '75%' }}>Totals</h3>
+                        <h3 className="font-bold mb-1" style={{ width: '55%' }}>Hours</h3>
                         <div className="space-y-0.5 mr-4">
                             <div>F: {payPeriod.flight_hours.toFixed(1)}</div>
                             <div>G: {payPeriod.ground_hours.toFixed(1)}</div>
@@ -59,9 +59,9 @@ export default function Display({
                         </div>
                     </div>
                     <div>
+                        <h3 className="font-bold mb-1" style={{ width: '55%' }}>Earned</h3>
                         <div className="space-y-0.5">
-                            <div className="font-bold">Earned</div>
-                            <div>Hours: {payPeriod.all_hours.toFixed(1)}</div>
+                            <div>Total: {payPeriod.all_hours.toFixed(1)}</div>
                             <div>Gross: ${payPeriod.gross.toFixed(2)}</div>
                             {payPeriod.remaining > 0 && (
                                 <div>Remaining: {payPeriod.remaining.toFixed(1)}h</div>
