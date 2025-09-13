@@ -8,10 +8,10 @@ import { useEntries } from '@/hooks/useEntries'
 import { usePayPeriod } from '@/hooks/usePayPeriod'
 import { useEntryForm } from '@/hooks/useEntryForm'
 import { getAPIPath } from '@/utils/backend'
-import type { ViewType } from '@/types'
+import type { Entry, ViewType } from '@/types'
 
 function App() {
-  const { entryData, resetEntryForm, handleFieldChange, handleFormChange } = useEntryForm();
+  const { entryData, cleanEntry, resetEntryForm, handleFieldChange, handleFormChange } = useEntryForm();
   const { payPeriod, fetchPayPeriod, calculateEntryValue, refreshPayPeriod, isLoading } = usePayPeriod();
   const { entries, fetchEntries, isLoading: entriesLoading } = useEntries();
   const apiPath = getAPIPath();
@@ -30,7 +30,7 @@ function App() {
       const response = await fetch(`${apiPath}/new`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(entryDataWithoutId)
+        body: JSON.stringify(cleanEntry(entryDataWithoutId as Entry))
       });
       const result = await response.json();
 
@@ -43,7 +43,7 @@ function App() {
       console.error('Error: ', error);
     }
 
-    resetEntryForm(entryData);
+    resetEntryForm(cleanEntry(entryData));
   };
 
   const handleViewChange = (newView: ViewType) => {

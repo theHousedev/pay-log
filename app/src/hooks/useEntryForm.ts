@@ -61,5 +61,36 @@ export const useEntryForm = () => {
         }));
     }
 
-    return { entryData, resetEntryForm, handleFieldChange, handleFormChange }
+    const cleanEntry = (entry: Entry): Entry => {
+        const cleanEntry = { ...entry };
+
+        switch (entry.type) {
+            case 'flight':
+                cleanEntry.sim_hours = null;
+                cleanEntry.admin_hours = null;
+                cleanEntry.ride_count = null;
+                break;
+            case 'ground':
+                cleanEntry.sim_hours = null;
+                cleanEntry.admin_hours = null;
+                cleanEntry.ride_count = null;
+                break;
+            case 'sim':
+                cleanEntry.flight_hours = null;
+                cleanEntry.admin_hours = null;
+                cleanEntry.ride_count = null;
+                break;
+            case 'admin':
+                if (entry.ride_count) {
+                    cleanEntry.customer = '';
+                    cleanEntry.admin_hours = null;
+                }
+                break;
+            case 'misc':
+                break;
+        }
+        return cleanEntry;
+    }
+
+    return { entryData, cleanEntry, resetEntryForm, handleFieldChange, handleFormChange }
 }

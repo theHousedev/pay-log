@@ -125,6 +125,7 @@ export default function InputTypes({ entry, onFieldChange }: InputTypesProps) {
                                         onFieldChange('ride_count', '');
                                     } else {
                                         onFieldChange('admin_hours', '');
+                                        onFieldChange('ride_count', '');
                                     }
                                 }} />
                         </div>
