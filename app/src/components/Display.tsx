@@ -1,15 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 import { formatDateRange } from "@/utils/frontend";
-import ViewSelector from "@/components/ViewSelector";
 import EntriesTable from "@/components/EntriesTable";
-import type { PayPeriod, ViewType, Entry } from "@/types";
+import type { PayPeriod, Entry } from "@/types";
 
 interface DisplayProps {
     payPeriod: PayPeriod;
     isLoading?: boolean;
-    view: ViewType;
-    onViewChange: (view: ViewType) => void;
     entries: Entry[];
     entriesLoading: boolean;
     onDeleteEntry: (id: number) => void;
@@ -18,8 +15,6 @@ interface DisplayProps {
 export default function Display({
     payPeriod,
     isLoading = false,
-    view,
-    onViewChange,
     entries,
     entriesLoading,
     onDeleteEntry
@@ -27,12 +22,9 @@ export default function Display({
     if (isLoading || entriesLoading) {
         return (
             <Card className="w-full mb-4">
-                <CardHeader>
-                    <CardTitle>Loading Current Pay Period...</CardTitle>
-                </CardHeader>
                 <CardContent>
                     <div className="text-center text-muted-foreground">
-                        Fetching data from backend...
+                        Fetching...
                     </div>
                 </CardContent>
             </Card>
@@ -41,11 +33,6 @@ export default function Display({
 
     return (
         <Card className="w-full mb-1 gap-1">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-3 whitespace-pre-line">
-                    <ViewSelector view={view} onViewChange={onViewChange} />
-                </CardTitle>
-            </CardHeader>
             <CardContent>
                 <div className="mb-0">{formatDateRange(payPeriod.start, payPeriod.end)}</div>
                 <div className="flex gap-4 mb-4" style={{ fontSize: '0.8rem' }}>

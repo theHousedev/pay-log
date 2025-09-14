@@ -38,6 +38,7 @@ func setupNewEntry(database *db.Database) http.HandlerFunc {
 
 func setupAuthOK() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// If we reach here, the auth() middleware has already validated the session
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status": "authenticated"}`))
@@ -48,12 +49,12 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session_id")
 		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
 		if !validateSession(cookie.Value) {
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 

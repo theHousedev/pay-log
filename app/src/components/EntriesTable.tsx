@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import type { Entry } from "@/types";
 
 interface EntriesTableProps {
@@ -22,9 +22,9 @@ export default function EntriesTable({ entries, isLoading, onDeleteEntry }: Entr
 
     const fmtDate = (dateStr: string) => {
         if (!dateStr) return '';
-        const datePart = dateStr.split('T')[0]; // Gets "2025-09-09"
+        const datePart = dateStr.split('T')[0];
         const [year, month, day] = datePart.split('-').map(Number);
-        const date = new Date(year, month - 1, day); // month is 0-indexed
+        const date = new Date(year, month - 1, day);
 
         return date.toLocaleDateString('en-US', {
             month: 'short',
@@ -64,9 +64,6 @@ export default function EntriesTable({ entries, isLoading, onDeleteEntry }: Entr
 
     return (
         <Card className="w-100% mb-0">
-            <CardHeader>
-                <CardTitle>Entries</CardTitle>
-            </CardHeader>
             <CardContent>
                 <div className="overflow-x-auto">
                     <table className="w-full text-xs max-w-[650px]">

@@ -2,6 +2,7 @@
 admin/
 .env
 *.db
+auth
 
 # Logs
 logs

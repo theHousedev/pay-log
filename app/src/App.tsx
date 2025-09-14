@@ -7,20 +7,25 @@ import LoginForm from '@/components/LoginForm'
 import { useEntries } from '@/hooks/useEntries'
 import { usePayPeriod } from '@/hooks/usePayPeriod'
 import { useEntryForm } from '@/hooks/useEntryForm'
+import { useAuth } from '@/contexts/AuthContext'
 import { getAPIPath } from '@/utils/backend'
 import type { Entry, ViewType } from '@/types'
 
 function App() {
   const { entryData, cleanEntry, resetEntryForm, handleFieldChange, handleFormChange } = useEntryForm();
-  const { payPeriod, fetchPayPeriod, calculateEntryValue, refreshPayPeriod, isLoading } = usePayPeriod();
+  const { payPeriod, fetchPayPeriod, calculateEntryValue, refreshPayPeriod } = usePayPeriod();
   const { entries, fetchEntries, isLoading: entriesLoading } = useEntries();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const apiPath = getAPIPath();
   const [view, setView] = useState<ViewType>('period');
 
   useEffect(() => {
-    fetchPayPeriod();
-    fetchEntries('period');
-  }, []);
+    if (!authLoading && isAuthenticated) {
+      console.log('App: Authentication complete, making initial API calls');
+      fetchPayPeriod();
+      fetchEntries('period');
+    }
+  }, [authLoading, isAuthenticated]);
 
   const handleSubmitEntry = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -90,7 +95,6 @@ function App() {
               onSubmitEntry={handleSubmitEntry}
               entryValue={calculateEntryValue(entryData)}
               payPeriod={payPeriod}
-              isLoading={isLoading}
               view={view}
               onViewChange={handleViewChange}
               entries={entries}

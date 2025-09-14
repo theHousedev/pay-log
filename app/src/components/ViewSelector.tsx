@@ -25,7 +25,7 @@ export default function ViewSelector({ view, onViewChange }: ViewTypeProps) {
                     key={type}
                     style={{
                         height: '30px',
-                        width: '60px'
+                        width: '60px',
                     }}
                     variant={view === type ? "default" : "outline"}
                     className={view === type ? "opacity-75" : "opacity-50"}

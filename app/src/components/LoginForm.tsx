@@ -1,24 +1,38 @@
-import React from 'react'
+import { type FormEvent } from 'react'
 import { getAPIPath } from '@/utils/backend'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useNavigate } from 'react-router-dom'
 
-const LoginForm = () => {
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+export default function LoginForm() {
+    const { refreshAuth } = useAuth()
+    const navigate = useNavigate()
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const formData = new FormData(e.target as HTMLFormElement)
-        const response = await fetch(`${getAPIPath()}/login`, {
-            method: 'POST',
-            body: formData,
-        })
-        const data = await response.json()
 
-        if (data.status === 'success') {
-            window.location.href = data.redirect || '/'
-        } else {
-            alert(data.message || 'Login failed')
+        try {
+            const response = await fetch(`${getAPIPath()}/login`, {
+                method: 'POST',
+                body: formData,
+            })
+            const data = await response.json()
+
+            if (data.status === 'success') {
+                console.log('LoginForm: Login successful, refreshing auth...');
+                await refreshAuth()
+                console.log('LoginForm: Auth refreshed, navigating to /');
+                navigate('/')
+            } else {
+                console.log('LoginForm: Login failed:', data.message);
+                alert(data.message || 'Login failed')
+            }
+        } catch (error) {
+            console.error('Login error:', error)
+            alert('Login failed. Please try again.')
         }
     }
 
@@ -67,5 +81,3 @@ const LoginForm = () => {
         </div>
     )
 }
-
-export default LoginForm

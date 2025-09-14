@@ -1,9 +1,12 @@
 import { useRef, useState } from "react";
 
 import type { Entry, PayPeriod } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 import { getAPIPath } from "@/utils/backend";
 
 export const usePayPeriod = () => {
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
+
     const [payPeriod, setPayPeriod] = useState<PayPeriod>({
         start: '',
         end: '',
@@ -37,8 +40,16 @@ export const usePayPeriod = () => {
     };
 
     const fetchPayPeriod = async (forceRefresh = false) => {
+        if (authLoading) {
+            console.log('Auth still loading, skipping call: fetchPayPeriod');
+            return;
+        }
+        if (!isAuthenticated) {
+            console.log('Not authenticated, skipping call: fetchPayPeriod');
+            return;
+        }
         if (hasFetched.current && !forceRefresh) {
-            console.log('Duplicate fetch call');
+            console.log('Duplicate fetch call prevented');
             return;
         }
 

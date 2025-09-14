@@ -1,44 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAPIPath } from '@/utils/backend';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AuthGuardProps {
     children: React.ReactNode;
 }
 
 export default function AuthGuard({ children }: AuthGuardProps) {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const { isAuthenticated, isLoading } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        checkAuth();
-    }, []);
-
-    useEffect(() => {
+        console.log('AuthGuard: isLoading =', isLoading, 'isAuthenticated =', isAuthenticated);
         if (!isLoading && !isAuthenticated) {
+            console.log('AuthGuard: Redirecting to login...');
             navigate('/login');
         }
     }, [isLoading, isAuthenticated, navigate]);
-
-    const checkAuth = async () => {
-        try {
-            const url = `${getAPIPath()}/auth-ok`;
-            const response = await fetch(url, {
-                credentials: 'include'
-            });
-
-            if (response.status === 200) {
-                setIsAuthenticated(true);
-            } else {
-                setIsAuthenticated(false);
-            }
-        } catch (error) {
-            setIsAuthenticated(false);
-        }
-
-        setIsLoading(false);
-    };
 
     if (isLoading) {
         return <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -47,8 +25,10 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     }
 
     if (!isAuthenticated) {
-        return null; // Don't render anything while redirecting
+        console.log('AuthGuard: Not authenticated, returning null');
+        return null;
     }
 
+    console.log('AuthGuard: Authenticated, rendering children');
     return <>{children}</>;
 }

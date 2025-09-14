@@ -1,13 +1,24 @@
 import { useState } from 'react';
-import type { Entry, ViewType } from '@/types';
 import { getAPIPath } from '@/utils/backend';
+import { useAuth } from '@/contexts/AuthContext';
+import type { Entry, ViewType } from '@/types';
 
 export const useEntries = () => {
     const [entries, setEntries] = useState<Entry[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const apiPath = getAPIPath();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
 
     const fetchEntries = async (view: ViewType, date?: string) => {
+        if (authLoading) {
+            console.log('Auth still loading, skipping call: fetchEntries');
+            return;
+        }
+        if (!isAuthenticated) {
+            console.log('Not authenticated, skipping call: fetchEntries');
+            return;
+        }
+        console.log('Fetching entries for view:', view);
         setIsLoading(true);
         try {
             const params = new URLSearchParams({ view });
