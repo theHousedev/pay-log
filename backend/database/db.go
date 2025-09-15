@@ -85,6 +85,8 @@ func (database *Database) FetchEntries(beginDate string, endDate string) ([]Entr
 	var args []interface{}
 
 	if beginDate != "all" && endDate != "all" {
+		beginDate = strings.Split(beginDate, "T")[0]
+		endDate = strings.Split(endDate, "T")[0]
 		query += "WHERE date BETWEEN ? AND ?"
 		args = []interface{}{beginDate, endDate}
 	}

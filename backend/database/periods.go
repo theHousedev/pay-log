@@ -44,13 +44,13 @@ func (db *Database) GetCurrentPayPeriod(date string) (Paycheck, error) {
 		SELECT id, start_date, end_date, pay_date, expected_pay_gross, 
 		       actual_pay_gross, actual_pay_net, last_updated
 		FROM pay_periods 
-		WHERE status = 'current'
+		WHERE status = 'current' AND ? BETWEEN start_date AND end_date
 		ORDER BY start_date DESC
 		LIMIT 1
 	`
 
 	var period Paycheck
-	err := db.QueryRow(query).Scan(
+	err := db.QueryRow(query, date).Scan(
 		&period.ID, &period.BeginDate, &period.EndDate, &period.PayDate,
 		&period.GrossEarned, &period.GrossActual, &period.NetActual,
 		&period.LastUpdated,
@@ -204,6 +204,9 @@ func (db *Database) GetCurrentRates(date string) (PayRate, error) {
 
 // CalculatePeriodTotals -
 func (db *Database) CalculatePeriodTotals(periodID int, startDate, endDate string) (map[string]interface{}, error) {
+	startDate = strings.Split(startDate, "T")[0]
+	endDate = strings.Split(endDate, "T")[0]
+
 	rates, err := db.GetCurrentRates(startDate)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get rates: %v", err)
@@ -253,4 +256,25 @@ func (db *Database) CalculatePeriodTotals(periodID int, startDate, endDate strin
 		"admin_pay":    adminPay,
 		"total_gross":  totalGross,
 	}, nil
+}
+
+// UpdatePayPeriodTotals -
+func (db *Database) UpdatePayPeriodTotals(periodID int) error {
+	var startDate, endDate string
+	err := db.QueryRow("SELECT start_date, end_date FROM pay_periods WHERE id = ?", periodID).Scan(&startDate, &endDate)
+	if err != nil {
+		return fmt.Errorf("failed to get period dates: %v", err)
+	}
+
+	totals, err := db.CalculatePeriodTotals(periodID, startDate, endDate)
+	if err != nil {
+		return fmt.Errorf("failed to calculate totals: %v", err)
+	}
+
+	updateQuery := `UPDATE pay_periods SET expected_pay_gross = ?, last_updated = CURRENT_TIMESTAMP WHERE id = ?`
+	_, err = db.Exec(updateQuery, totals["total_gross"], periodID)
+	if err != nil {
+		return fmt.Errorf("failed to update pay period totals: %v", err)
+	}
+	return nil
 }
