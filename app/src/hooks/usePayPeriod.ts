@@ -19,13 +19,16 @@ export const usePayPeriod = () => {
         remaining: 0
     })
 
-    const [currentRates, setCurrentRates] = useState({ cfi_rate: 26.50, admin_rate: 13.75 })
+    const [currentRates, setCurrentRates] = useState({
+        cfi_rate: 26.50, admin_rate: 13.75
+    })
     const [isLoading, setIsLoading] = useState(true);
     const hasFetched = useRef(false)
     const apiPath = getAPIPath();
 
     const calculateEntryValue = (entry: Entry): number => {
-        const cfiHours = (entry.flight_hours || 0) + (entry.ground_hours || 0) + (entry.sim_hours || 0);
+        const cfiHours = (entry.flight_hours || 0) +
+            (entry.ground_hours || 0) + (entry.sim_hours || 0);
         const rideHours = (entry.ride_count || 0) * 0.2;
         const totalAdminHours = (entry.admin_hours || 0) + rideHours;
         const cfiPay = cfiHours * currentRates.cfi_rate;
@@ -40,16 +43,10 @@ export const usePayPeriod = () => {
     };
 
     const fetchPayPeriod = async (forceRefresh = false) => {
-        if (authLoading) {
-            console.log('Auth still loading, skipping call: fetchPayPeriod');
-            return;
-        }
-        if (!isAuthenticated) {
-            console.log('Not authenticated, skipping call: fetchPayPeriod');
-            return;
-        }
-        if (hasFetched.current && !forceRefresh) {
-            console.log('Duplicate fetch call prevented');
+        if (authLoading ||
+            !isAuthenticated ||
+            (hasFetched.current && !forceRefresh)) {
+            // skip fetch
             return;
         }
 
@@ -60,9 +57,7 @@ export const usePayPeriod = () => {
 
             if (result.status === 'OK' && result.data) {
                 const { period, totals } = result.data;
-                console.log('Backend totals received:', totals);
-
-                setPayPeriod({
+                const newPayPeriod = {
                     start: period.begin_date,
                     end: period.end_date,
                     flight_hours: totals.flight_hours || 0,
@@ -74,7 +69,8 @@ export const usePayPeriod = () => {
                     all_hours: totals.total_hours || 0,
                     gross: totals.total_gross || 0,
                     remaining: 0 // TODO: calculate remaining hours
-                });
+                };
+                setPayPeriod(newPayPeriod);
 
                 setCurrentRates({
                     cfi_rate: totals.cfi_rate || 26.50,

@@ -1,39 +1,59 @@
 import { Button } from "@/components/ui/button"
+import DaySelector from "./DaySelector"
 import type { ViewType } from "@/types"
 
 interface ViewTypeProps {
     view: ViewType;
     onViewChange: (type: ViewType) => void;
+    selectedDate?: string;
+    onDateChange?: (date: string) => void;
 }
 
-export default function ViewSelector({ view, onViewChange }: ViewTypeProps) {
+export default function ViewSelector({
+    view,
+    onViewChange,
+    selectedDate,
+    onDateChange
+}: ViewTypeProps) {
     return (
-        <div
-            className="buttonRow"
-            id="view-selector"
-            style={{
-                display: 'flex',
-                height: '20px',
-                flexDirection: 'row',
-                gap: '1px',
-                marginBottom: '5px',
-                marginTop: '0px',
-                justifyContent: 'center'
-            }}>
-            {(['period', 'day', 'week', 'all'] as ViewType[]).map(type => (
-                <Button
-                    key={type}
-                    style={{
-                        height: '30px',
-                        width: '60px',
-                    }}
-                    variant={view === type ? "default" : "outline"}
-                    className={view === type ? "opacity-75" : "opacity-50"}
-                    onClick={() => onViewChange(type)}
-                >
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                </Button>
-            ))}
+        <div className="space-y-2">
+            <div
+                className="buttonRow"
+                id="view-selector"
+                style={{
+                    display: 'flex',
+                    height: '20px',
+                    flexDirection: 'row',
+                    gap: '5px',
+                    marginLeft: '5px',
+                    marginBottom: '5px',
+                    marginTop: '0px',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                {(['period', 'day', 'week', 'all'] as ViewType[]).map(type => (
+                    <Button
+                        key={type}
+                        style={{
+                            height: '30px',
+                            width: '65px',
+                        }}
+                        variant={view === type ? "default" : "outline"}
+                        className={view === type ? "opacity-75" : "opacity-50"}
+                        onClick={() => onViewChange(type)}
+                    >
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </Button>
+                ))}
+                {view === 'day' && selectedDate && onDateChange && (
+                    <DaySelector
+                        selectedDate={selectedDate}
+                        onDateChange={onDateChange}
+                    />
+                )}
+            </div>
+
+
         </div>
     )
 }

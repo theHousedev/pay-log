@@ -17,10 +17,10 @@ export const formatDateRange = (startDate: string, endDate: string) => {
             return fmtDate('dd', start) + ' - ' +
                 fmtDate('ddmmm', end) + startYear;
         }
-        return fmtDate('dd', start) + startMonth + ' - ' +
+        return fmtDate('dd', start) + ' - ' +
             fmtDate('ddmmm', end) + endYear;
     }
-    return fmtDate('dd', start) + startMonth + startYear +
+    return fmtDate('dd', start) + startYear +
         ' - ' + fmtDate('ddmmm', end) + endYear;
 };
 

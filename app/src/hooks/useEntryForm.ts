@@ -1,16 +1,13 @@
 import type { Entry, EntryType } from "@/types";
 import { useState } from "react";
+import { format } from "date-fns";
 
 export const useEntryForm = () => {
     const [entryData, setEntryData] = useState<Entry>({
         id: '',
         type: 'flight',
         date: new Date().toLocaleDateString("en-CA"),
-        time: new Date().toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit'
-        }),
+        time: format(new Date(Date.now()), 'HH:mm'),
         flight_hours: null,
         ground_hours: null,
         sim_hours: null,
@@ -21,12 +18,12 @@ export const useEntryForm = () => {
         meeting: false
     })
 
-    const resetEntryForm = (currentEntry: Entry): Entry => {
+    const makeBlankEntry = (type: string): Entry => {
         return {
-            id: currentEntry.id,
-            type: currentEntry.type,
-            date: currentEntry.date,
-            time: currentEntry.time,
+            id: '',
+            type: type as EntryType,
+            date: new Date().toLocaleDateString("en-CA"),
+            time: format(new Date(Date.now()), 'HH:mm'),
             flight_hours: null,
             ground_hours: null,
             sim_hours: null,
@@ -35,7 +32,13 @@ export const useEntryForm = () => {
             notes: '',
             ride_count: null,
             meeting: false
-        };
+        }
+    }
+
+    const resetEntryForm = (type: string): Entry => {
+        const blankEntry = makeBlankEntry(type);
+        setFormData(blankEntry);
+        return blankEntry;
     }
 
     const handleFieldChange = (field: keyof Entry, value: string | number) => {
@@ -47,6 +50,10 @@ export const useEntryForm = () => {
         }
 
         setEntryData(prev => ({ ...prev, [field]: convertedValue }))
+    }
+
+    const setFormData = (data: Entry) => {
+        setEntryData(data);
     }
 
     const handleFormChange = (type: EntryType) => {
@@ -61,7 +68,7 @@ export const useEntryForm = () => {
         }));
     }
 
-    const cleanEntry = (entry: Entry): Entry => {
+    const cleanEntryByType = (entry: Entry): Entry => {
         const cleanEntry = { ...entry };
 
         switch (entry.type) {
@@ -92,5 +99,13 @@ export const useEntryForm = () => {
         return cleanEntry;
     }
 
-    return { entryData, cleanEntry, resetEntryForm, handleFieldChange, handleFormChange }
+    return {
+        entryData,
+        cleanEntryByType,
+        resetEntryForm,
+        handleFieldChange,
+        handleFormChange,
+        setFormData,
+        makeBlankEntry,
+    }
 }

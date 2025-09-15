@@ -11,14 +11,11 @@ export const useEntries = () => {
 
     const fetchEntries = async (view: ViewType, date?: string) => {
         if (authLoading) {
-            console.log('Auth still loading, skipping call: fetchEntries');
             return;
         }
         if (!isAuthenticated) {
-            console.log('Not authenticated, skipping call: fetchEntries');
             return;
         }
-        console.log('Fetching entries for view:', view);
         setIsLoading(true);
         try {
             const params = new URLSearchParams({ view });

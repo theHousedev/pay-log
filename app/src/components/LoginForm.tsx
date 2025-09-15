@@ -22,16 +22,12 @@ export default function LoginForm() {
             const data = await response.json()
 
             if (data.status === 'success') {
-                console.log('LoginForm: Login successful, refreshing auth...');
                 await refreshAuth()
-                console.log('LoginForm: Auth refreshed, navigating to /');
                 navigate('/')
             } else {
-                console.log('LoginForm: Login failed:', data.message);
                 alert(data.message || 'Login failed')
             }
         } catch (error) {
-            console.error('Login error:', error)
             alert('Login failed. Please try again.')
         }
     }

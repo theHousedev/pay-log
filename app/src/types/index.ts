@@ -35,3 +35,12 @@ export interface PayPeriod {
     gross: number
     remaining: number
 }
+
+export interface ViewTotals {
+    flight_hours: number
+    ground_hours: number
+    sim_hours: number
+    admin_hours: number
+    all_hours: number
+    gross: number
+}

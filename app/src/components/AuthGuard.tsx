@@ -11,9 +11,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log('AuthGuard: isLoading =', isLoading, 'isAuthenticated =', isAuthenticated);
         if (!isLoading && !isAuthenticated) {
-            console.log('AuthGuard: Redirecting to login...');
             navigate('/login');
         }
     }, [isLoading, isAuthenticated, navigate]);
@@ -25,10 +23,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     }
 
     if (!isAuthenticated) {
-        console.log('AuthGuard: Not authenticated, returning null');
         return null;
     }
-
-    console.log('AuthGuard: Authenticated, rendering children');
     return <>{children}</>;
 }

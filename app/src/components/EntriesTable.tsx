@@ -5,10 +5,11 @@ import type { Entry } from "@/types";
 interface EntriesTableProps {
     entries: Entry[];
     isLoading: boolean;
-    onDeleteEntry: (id: number) => void;
+    onDeleteEntry: (id: string) => void;
+    onEditEntry: (id: string) => void;
 }
 
-export default function EntriesTable({ entries, isLoading, onDeleteEntry }: EntriesTableProps) {
+export default function EntriesTable({ entries, isLoading, onDeleteEntry, onEditEntry }: EntriesTableProps) {
     const fmtTime = (timeStr: string) => {
         timeStr = timeStr.replace(':', '');
         if (!timeStr) return '';
@@ -69,6 +70,7 @@ export default function EntriesTable({ entries, isLoading, onDeleteEntry }: Entr
                     <table className="w-full text-xs max-w-[650px]">
                         <thead>
                             <tr className="border-b">
+                                <th className="text-right table-cell-width-3"></th>
                                 <th className="text-left p-0 sm:table-cell">Time</th>
                                 <th className="text-left p-0">F</th>
                                 <th className="text-left p-0">G</th>
@@ -77,12 +79,19 @@ export default function EntriesTable({ entries, isLoading, onDeleteEntry }: Entr
                                 <th className="text-left p-1 sm:table-cell">Customer</th>
                                 <th className="text-right p-0 sm:table-cell">Rides</th>
                                 <th className="text-left p-1 hidden lg:table-cell">Notes</th>
-                                <th className="text-right p-1"></th>
+                                <th className="text-right table-cell-width-3"></th>
                             </tr>
                         </thead>
                         <tbody>
                             {entries.map((entry) => (
-                                <tr key={entry.id} className="border-b hover:bg-gray-50">
+                                <tr key={entry.id} className="border-b hover:bg-muted/30">
+                                    <td className="xs:table-cell xs:text-right table-cell-width-3">
+                                        <Button
+                                            style={{ width: '8px', height: '20px' }}
+                                            onClick={() => onDeleteEntry(entry.id)}>
+                                            ✖
+                                        </Button>
+                                    </td>
                                     <td className="p-0">
                                         <div className="text-xs">
                                             <div>{fmtDate(entry.date)}</div>
@@ -96,9 +105,11 @@ export default function EntriesTable({ entries, isLoading, onDeleteEntry }: Entr
                                     <td className="p-1 sm:table-cell">{fmtName(entry.customer)}</td>
                                     <td className="p-2 text-right sm:table-cell">{entry.ride_count}</td>
                                     <td className="p-1 hidden lg:table-cell max-w-xs truncate">{entry.notes || ''}</td>
-                                    <td className="p-1 xs:table-cell xs:text-right">
-                                        <Button variant="destructive" size="icon" onClick={() => onDeleteEntry(Number(entry.id))}>
-                                            ❌
+                                    <td className="xs:table-cell xs:text-right table-cell-width-3">
+                                        <Button
+                                            style={{ width: '8px', height: '20px' }}
+                                            onClick={() => onEditEntry(entry.id)}>
+                                            ✏
                                         </Button>
                                     </td>
                                 </tr>

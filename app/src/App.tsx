@@ -1,86 +1,40 @@
-import { useEffect, useState } from 'react'
+// App.tsx
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 import MainForm from '@/components/Form'
 import AuthGuard from '@/components/AuthGuard'
 import LoginForm from '@/components/LoginForm'
-import { useEntries } from '@/hooks/useEntries'
 import { usePayPeriod } from '@/hooks/usePayPeriod'
 import { useEntryForm } from '@/hooks/useEntryForm'
-import { useAuth } from '@/contexts/AuthContext'
-import { getAPIPath } from '@/utils/backend'
-import type { Entry, ViewType } from '@/types'
+import { useViewTotals } from '@/hooks/useViewTotals'
+import { useEntryManager } from '@/hooks/useEntryManager'
+
+import type { ViewType } from '@/types'
 
 function App() {
-  const { entryData, cleanEntry, resetEntryForm, handleFieldChange, handleFormChange } = useEntryForm();
-  const { payPeriod, fetchPayPeriod, calculateEntryValue, refreshPayPeriod } = usePayPeriod();
-  const { entries, fetchEntries, isLoading: entriesLoading } = useEntries();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const apiPath = getAPIPath();
+  const { payPeriod, calculateEntryValue, refreshPayPeriod } = usePayPeriod();
+  const { viewTotals, fetchViewTotals } = useViewTotals();
   const [view, setView] = useState<ViewType>('period');
+  const {
+    entryData,
+    handleFieldChange,
+    handleFormChange,
+    setFormData } = useEntryForm();
+  const {
+    isEditMode,
+    entries,
+    entriesLoading,
+    fetchEntries,
+    handleEditEntry,
+    handleSubmitEntry,
+    handleDeleteEntry
+  } = useEntryManager(view, entryData, setFormData, refreshPayPeriod);
 
-  useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      console.log('App: Authentication complete, making initial API calls');
-      fetchPayPeriod();
-      fetchEntries('period');
-    }
-  }, [authLoading, isAuthenticated]);
-
-  const handleSubmitEntry = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const { id, ...entryDataWithoutId } = entryData;
-
-    try {
-      const response = await fetch(`${apiPath}/new`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cleanEntry(entryDataWithoutId as Entry))
-      });
-      const result = await response.json();
-
-      if (result.status === 'OK') {
-        console.log(result.message, result.data.entry_id);
-        await fetchEntries(view);
-        await refreshPayPeriod();
-      }
-    } catch (error) {
-      console.error('Error: ', error);
-    }
-
-    resetEntryForm(cleanEntry(entryData));
-  };
-
-  const handleViewChange = (newView: ViewType) => {
+  const handleViewChange = (newView: ViewType, date?: string) => {
     setView(newView)
-    fetchEntries(newView);
-  }
-
-  const handleDeleteEntry = async (id: number) => {
-    const confirmed = window.confirm('Confirm deletion of entry');
-    if (!confirmed) return;
-    deleteAsync(id);
-  }
-
-  const deleteAsync = async (id: number) => {
-    try {
-      const response = await fetch(`${apiPath}/delete?id=${id}`, {
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      const result = await response.json();
-
-      if (result.status === 'OK') {
-        console.log(result.message, result.data.entry_id);
-        await fetchEntries(view);
-        await refreshPayPeriod();
-      } else {
-        alert(`Failed to delete entry: ${result.message}`);
-      }
-    } catch (error) {
-      console.error('Error deleting entry:', error);
-      alert('Failed to delete entry. Please try again.');
-    }
+    fetchEntries(newView, date);
+    fetchViewTotals(newView, date);
   }
 
   return (
@@ -99,7 +53,17 @@ function App() {
               onViewChange={handleViewChange}
               entries={entries}
               entriesLoading={entriesLoading}
+              onEditEntry={handleEditEntry}
               onDeleteEntry={handleDeleteEntry}
+              viewTotals={viewTotals ?? {
+                flight_hours: 0,
+                ground_hours: 0,
+                sim_hours: 0,
+                admin_hours: 0,
+                all_hours: 0,
+                gross: 0,
+              }}
+              isEditMode={isEditMode}
             />
           </AuthGuard>} />
         <Route path="/login" element={<LoginForm />} />

@@ -99,7 +99,21 @@ func setupLogin() http.HandlerFunc {
 
 func setupEditEntry(database *db.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		response := database.EditEntry(r.URL.Query().Get("id"))
+		if r.Method != http.MethodPut {
+			http.Error(w, "Invalid method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var entry db.Entry
+		if err := json.NewDecoder(r.Body).Decode(&entry); err != nil {
+			toJSON(w, db.Response{
+				Status:  "ERROR",
+				Message: "Invalid JSON format",
+			})
+			return
+		}
+
+		response := database.UpdateEntry(entry)
 		toJSON(w, response)
 	}
 }
@@ -229,9 +243,116 @@ func setupGetEntries(database *db.Database) http.HandlerFunc {
 	}
 }
 
+func setupGetTotals(database *db.Database) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Invalid method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		view := r.URL.Query().Get("view")
+		if view == "" {
+			view = "period"
+		}
+
+		date := r.URL.Query().Get("date")
+		if date == "" {
+			date = time.Now().In(time.Local).Format("2006-01-02")
+		}
+
+		var entries []db.Entry
+		var err error
+		var totals map[string]interface{}
+
+		switch view {
+		case "day":
+			entries, err = database.FetchEntries(date, date)
+
+		case "week":
+			startOfWeek, endOfWeek := getCurrentWeek(date)
+			entries, err = database.FetchEntries(startOfWeek, endOfWeek)
+
+		case "all":
+			entries, err = database.FetchEntries("all", "all")
+
+		default:
+			toJSON(w, db.Response{
+				Status:  "ERROR",
+				Message: "Invalid view type for totals",
+			})
+			return
+		}
+
+		if err != nil {
+			toJSON(w, db.Response{
+				Status:  "ERROR",
+				Message: fmt.Sprintf("Failed to fetch entries: %v", err),
+			})
+			return
+		}
+
+		totals = calculateTotalsFromEntries(entries)
+
+		data, _ := json.Marshal(totals)
+		toJSON(w, db.Response{
+			Status:  "OK",
+			Message: fmt.Sprintf("Totals retrieved for %s view", view),
+			Data:    data,
+		})
+	}
+}
+
+func safeFloat64(ptr *float64) float64 {
+	if ptr != nil {
+		return *ptr
+	}
+	return 0.0
+}
+
+func calculateTotalsFromEntries(entries []db.Entry) map[string]interface{} {
+	var flightHours, groundHours, simHours, adminHours, totalHours float64
+	var totalGross float64
+	cfiRate := 26.50
+	adminRate := 13.75
+
+	for _, entry := range entries {
+		fh := safeFloat64(entry.FlightHours)
+		gh := safeFloat64(entry.GroundHours)
+		sh := safeFloat64(entry.SimHours)
+		ah := safeFloat64(entry.AdminHours)
+
+		if entry.Type == "admin" && entry.RideCount != nil && *entry.RideCount > 0 {
+			rideAdminHours := float64(*entry.RideCount) * 0.2
+			ah = rideAdminHours
+		}
+
+		flightHours += fh
+		groundHours += gh
+		simHours += sh
+		adminHours += ah
+		cfiHours := fh + gh + sh
+		cfiPay := cfiHours * cfiRate
+		adminPay := ah * adminRate
+		totalGross += cfiPay + adminPay
+	}
+
+	totalHours = flightHours + groundHours + simHours + adminHours
+
+	return map[string]interface{}{
+		"flight_hours": flightHours,
+		"ground_hours": groundHours,
+		"sim_hours":    simHours,
+		"admin_hours":  adminHours,
+		"all_hours":    totalHours,
+		"gross":        totalGross,
+		"cfi_rate":     cfiRate,
+		"admin_rate":   adminRate,
+	}
+}
+
 func getCurrentWeek(dateStr string) (string, string) {
 	date, _ := time.Parse("2006-01-02", dateStr)
 	startOfWeek := date.AddDate(0, 0, -int(date.Weekday())+1) // monday
-	endOfWeek := startOfWeek.AddDate(0, 0, 6)                 // sunday
+	endOfWeek := date                                         // today (not sunday)
 	return startOfWeek.Format("2006-01-02"), endOfWeek.Format("2006-01-02")
 }

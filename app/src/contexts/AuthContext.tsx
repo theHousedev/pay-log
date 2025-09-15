@@ -17,13 +17,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const checkAuth = async () => {
         try {
-            console.log('AuthContext: Checking authentication...');
             const response = await fetch(`${getAPIPath()}/auth-ok`, {
                 credentials: 'include'
             });
-            console.log('AuthContext: Auth response status:', response.status);
             if (response.status === 200) {
-                console.log('AuthContext: Authentication successful');
                 setIsAuthenticated(true);
                 return true;
             } else {
@@ -32,7 +29,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } catch (error) {
             console.error('AuthContext: Auth check failed:', error);
         }
-        console.log('AuthContext: Setting isAuthenticated to false');
         setIsAuthenticated(false);
         return false;
     };
@@ -50,11 +46,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const refreshAuth = async () => {
-        console.log('AuthContext: Refreshing authentication...');
         setIsLoading(true);
         await checkAuth();
         setIsLoading(false);
-        console.log('AuthContext: Refresh complete');
     };
 
     useEffect(() => {

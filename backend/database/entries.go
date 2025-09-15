@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 )
 
 const newEntrySQL = `
@@ -14,8 +15,6 @@ INSERT INTO pay_entries (
 `
 
 func (database *Database) NewEntry(entry Entry) Response {
-	fmt.Printf("Creating new entry...")
-
 	result, err := database.Exec(newEntrySQL,
 		entry.Type,
 		entry.Date,
@@ -47,7 +46,7 @@ func (database *Database) NewEntry(entry Entry) Response {
 		}
 	}
 
-	fmt.Printf("OK - Entry ID: %d\n", newID)
+	log.Printf("Created entry ID: %d\n", newID)
 	return Response{
 		Status:  "OK",
 		Message: "New entry created:",
@@ -55,30 +54,41 @@ func (database *Database) NewEntry(entry Entry) Response {
 	}
 }
 
-func (database *Database) EditEntry(id string) Response {
+func (database *Database) UpdateEntry(entry Entry) Response {
+	updateQuery := `
+UPDATE pay_entries SET date = ?, time = ?, flight_hours = ?,
+ground_hours = ?, sim_hours = ?, admin_hours = ?, customer = ?,
+notes = ?, ride_count = ?, meeting = ? WHERE id = ?`
+	_, err := database.Exec(updateQuery, entry.Date, entry.Time, entry.FlightHours,
+		entry.GroundHours, entry.SimHours, entry.AdminHours, entry.Customer, entry.Notes,
+		entry.RideCount, entry.Meeting, entry.ID)
+	if err != nil {
+		return Response{
+			Status:  "ERROR",
+			Message: fmt.Sprintf("Unable to update entry ID=%d: %s", entry.ID, err),
+		}
+	}
+	log.Printf("Updated entry ID: %d\n", entry.ID)
 	return Response{
 		Status:  "OK",
-		Message: "Edited entry:",
-		Data:    json.RawMessage(fmt.Sprintf(`{"entry_id": %s}`, id)),
+		Message: "Updated entry:",
+		Data:    json.RawMessage(fmt.Sprintf(`{"entry_id": %d}`, entry.ID)),
 	}
 }
 
 func (database *Database) DeleteEntry(id string) Response {
-	fmt.Printf("Delete call for ID: %s\n", id)
-
 	query := "DELETE FROM pay_entries WHERE id = ?"
 	_, err := database.Exec(query, id)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to delete entry ID=%s: %s", id, err)
-		fmt.Printf("Delete error: %s\n", msg)
+		log.Printf("Delete error: %s\n", msg)
 		return Response{
 			Status:  "ERROR",
 			Message: msg,
 		}
 	}
 
-	fmt.Printf("Deleted ID: %s\n", id)
-
+	log.Printf("Deleted entry ID: %s\n", id)
 	return Response{
 		Status:  "OK",
 		Message: "Entry deleted:",
@@ -96,7 +106,9 @@ func (database *Database) GetCheckEntries(checkID int) ([]Entry, error) {
 	var entries []Entry
 	for rows.Next() {
 		var entry Entry
-		err = rows.Scan(&entry.ID, &entry.Type, &entry.Date, &entry.Time, &entry.FlightHours, &entry.GroundHours, &entry.SimHours, &entry.AdminHours, &entry.Customer, &entry.Notes, &entry.RideCount, &entry.Meeting)
+		err = rows.Scan(&entry.ID, &entry.Type, &entry.Date, &entry.Time, &entry.FlightHours,
+			&entry.GroundHours, &entry.SimHours, &entry.AdminHours, &entry.Customer,
+			&entry.Notes, &entry.RideCount, &entry.Meeting)
 		if err != nil {
 			return nil, err
 		}
