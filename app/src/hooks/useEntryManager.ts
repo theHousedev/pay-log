@@ -60,11 +60,16 @@ export const useEntryManager = (
         event.preventDefault();
 
         try {
+            let cleanEntryData = { ...entryData };
+            if (entryData.type === 'admin' && entryData.ride_count && entryData.ride_count > 0) {
+                cleanEntryData = { ...entryData, admin_hours: null };
+            }
+
             let response;
             if (isEditMode && editingEntry) {
-                response = await entryService.updateEntry(entryData);
+                response = await entryService.updateEntry(cleanEntryData);
             } else {
-                const { id, ...entryDataWithoutId } = entryData;
+                const { id, ...entryDataWithoutId } = cleanEntryData;
                 response = await entryService.createEntry(entryDataWithoutId as Entry);
             }
 
