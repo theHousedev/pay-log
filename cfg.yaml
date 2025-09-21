@@ -2,5 +2,7 @@ tag: pay
 name: Pay Log
 description: Webapp to log and track pilot pay
 git_repo: http://github.com/theHousedev/pay-log
-backend_port: 5002
-frontend_port: 6002
+ports:
+  backend: 5002
+  frontend: 5012
+  production: 6002

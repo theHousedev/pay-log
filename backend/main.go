@@ -12,9 +12,14 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
+type Ports struct {
+	Backend    string `yaml:"backend"`
+	Frontend   string `yaml:"frontend"`
+	Production string `yaml:"production"`
+}
+
 type SiteConfig struct {
-	BackendPort  string `yaml:"backend_port"`
-	FrontendPort string `yaml:"frontend_port"`
+	Ports Ports `yaml:"ports"`
 }
 
 func loadConfig() (*SiteConfig, error) {
@@ -67,12 +72,19 @@ func main() {
 		log.Fatal("failed to load config: ", err)
 	}
 
+	var port string
+	if os.Getenv("ENVIRONMENT") == "production" {
+		port = cfg.Ports.Production
+	} else {
+		port = cfg.Ports.Backend
+	}
+
 	allowedOriginLoc := os.Getenv("ALLOWED_ORIGIN")
 	if allowedOriginLoc == "" {
 		fmt.Println("ALLOWED_ORIGIN not set; defaulting to *")
 		allowedOriginLoc = "*"
 	}
-	allowedOriginLAN := fmt.Sprintf("http://10.0.0.8:%s", cfg.FrontendPort)
+	allowedOriginLAN := fmt.Sprintf("http://10.0.0.8:%s", cfg.Ports.Frontend)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{allowedOriginLoc, allowedOriginLAN},
@@ -90,8 +102,8 @@ func main() {
 	http.HandleFunc("/api/get-entries", auth(setupGetEntries(database)))
 	http.HandleFunc("/api/get-totals", auth(setupGetTotals(database)))
 
-	fmt.Printf("\x1b[32m"+"running on 0.0.0.0:%s"+"\x1b[0m\n", cfg.BackendPort)
+	fmt.Printf("\x1b[32m"+"running on 0.0.0.0:%s"+"\x1b[0m\n", port)
 	handler := c.Handler(http.DefaultServeMux)
 	log.Fatal(http.ListenAndServe(
-		fmt.Sprintf("0.0.0.0:%s", cfg.BackendPort), handler))
+		fmt.Sprintf("0.0.0.0:%s", port), handler))
 }
