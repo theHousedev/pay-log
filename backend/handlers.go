@@ -132,6 +132,31 @@ func setupCheckHealth(database *db.Database) http.HandlerFunc {
 	}
 }
 
+func setupGetAllPeriods(database *db.Database) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Invalid method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		periods, err := database.GetAllPeriods()
+		if err != nil {
+			toJSON(w, db.Response{
+				Status:  "ERROR",
+				Message: fmt.Sprintf("Failed to get pay periods: %v", err),
+			})
+			return
+		}
+
+		data, _ := json.Marshal(periods)
+		toJSON(w, db.Response{
+			Status:  "OK",
+			Message: "All pay periods retrieved",
+			Data:    data,
+		})
+	}
+}
+
 func setupCurrentPeriod(database *db.Database) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {

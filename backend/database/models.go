@@ -26,6 +26,8 @@ type Paycheck struct {
 	GrossActual *float64 `json:"gross_actual,omitempty"`
 	NetActual   *float64 `json:"net_actual,omitempty"`
 	LastUpdated string   `json:"last_updated"`
+	TotalHours  *float64 `json:"total_hours,omitempty"`
+	Status      string   `json:"status"`
 }
 
 type PayRate struct {

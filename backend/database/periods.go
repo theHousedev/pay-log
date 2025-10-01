@@ -38,6 +38,52 @@ func (db *Database) UpdatePayPeriodStatus() error {
 	return nil
 }
 
+// GetAllPeriods -
+func (db *Database) GetAllPeriods() ([]Paycheck, error) {
+	query := `
+		SELECT id, start_date, end_date, status
+		FROM pay_periods
+		ORDER BY start_date DESC
+	`
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all periods: %v", err)
+	}
+	defer rows.Close()
+
+	var periods []Paycheck
+
+	for rows.Next() {
+		var id int
+		var startDate, endDate, status string
+
+		err = rows.Scan(&id, &startDate, &endDate, &status)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan period: %v", err)
+		}
+
+		totals, err := db.CalculatePeriodTotals(id, startDate, endDate)
+		if err != nil {
+			return nil, fmt.Errorf("failed to calculate totals: %v", err)
+		}
+
+		totalHours := totals["total_hours"].(float64)
+		grossEarned := totals["total_gross"].(float64)
+
+		period := Paycheck{
+			ID:          id,
+			BeginDate:   startDate,
+			EndDate:     endDate,
+			TotalHours:  &totalHours,
+			GrossEarned: &grossEarned,
+			Status:      status,
+		}
+
+		periods = append(periods, period)
+	}
+	return periods, nil
+}
+
 // GetCurrentPayPeriod -
 func (db *Database) GetCurrentPayPeriod(date string) (Paycheck, error) {
 	query := `
@@ -80,12 +126,20 @@ func (db *Database) GetCurrentPayPeriod(date string) (Paycheck, error) {
 		if err != nil {
 			return Paycheck{}, fmt.Errorf("failed to update period statuses: %v", err)
 		}
-
-		_, err = db.Exec("UPDATE pay_periods SET status = 'current' WHERE id = ?", period.ID)
+		currentPeriod, err := db.GetCurrentPayPeriod(time.Now().Format("2006-01-02"))
 		if err != nil {
-			return Paycheck{}, fmt.Errorf("failed to update period status: %v", err)
+			return Paycheck{}, fmt.Errorf("failed to get current period: %v", err)
 		}
-		return period, nil
+		// ensure we do not overwrite past period status for simple entry edits
+		if period.ID != currentPeriod.ID {
+			return period, nil
+		} else {
+			_, err = db.Exec("UPDATE pay_periods SET status = 'current' WHERE id = ?", period.ID)
+			if err != nil {
+				return Paycheck{}, fmt.Errorf("failed to update period status: %v", err)
+			}
+			return period, nil
+		}
 	}
 	return db.CreateNewPayPeriod(date)
 }
