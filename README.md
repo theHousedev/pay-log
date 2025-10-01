@@ -2,7 +2,7 @@
 
 This is 100% amateur hour so expect a big ole filetree filled with spaghetti
 
--# but hey, it's running and doing the job I want it to
+<sub>but hey, it's running and doing the job I want it to</sub>
 
 **Frontend:** React + TSX using Shadcn components and a robbed colortheme
 
