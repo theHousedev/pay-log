@@ -14,13 +14,16 @@ export const formatDateRange = (startDate: string, endDate: string) => {
 
     if (startYear === endYear) {
         if (startMonth === endMonth) {
+            // target: XX - XXFEB2025
             return fmtDate('dd', start) + ' - ' +
                 fmtDate('ddmmm', end) + startYear;
         }
-        return fmtDate('dd', start) + ' - ' +
+        // target: XXFEB - XXMAR2025
+        return fmtDate('ddmmm', start) + ' - ' +
             fmtDate('ddmmm', end) + endYear;
     }
-    return fmtDate('dd', start) + startYear +
+    // target: XXDEC2025 - XXJAN2026
+    return fmtDate('ddmmm', start) + startYear +
         ' - ' + fmtDate('ddmmm', end) + endYear;
 };
 
