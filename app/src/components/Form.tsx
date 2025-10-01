@@ -35,6 +35,7 @@ interface FormProps {
     allPeriods?: HistPayPeriod[];
     selectedPeriodID?: number | null;
     setSelectedPeriodID?: (id: number | null) => void;
+    selectedPeriod?: HistPayPeriod;
 }
 
 function MainForm({
@@ -54,6 +55,7 @@ function MainForm({
     isEditMode,
     allPeriods,
     selectedPeriodID,
+    selectedPeriod,
     setSelectedPeriodID,
 }: FormProps) {
     const [selectedDate, setSelectedDate] = useState(() => {
@@ -66,6 +68,18 @@ function MainForm({
             onViewChange('day', date)
         }
     }
+
+    const displayPeriod = selectedPeriod ? {
+        start: selectedPeriod.start,
+        end: selectedPeriod.end,
+        all_hours: selectedPeriod.total_hours,
+        gross: selectedPeriod.gross_earnings,
+        flight_hours: 0,
+        ground_hours: 0,
+        sim_hours: 0,
+        admin_hours: 0,
+        remaining: 0
+    } : payPeriod;
 
     return (
         <div className="flex justify-center items-center mt-1.5">
@@ -131,26 +145,26 @@ function MainForm({
                         <div className="bg-muted/50 rounded-lg p-4" style={{ width: '50%' }}>
                             <div className="text-sm text-muted-foreground mb-2">
                                 {(() => {
-                                    return formatDateRange(payPeriod.start, payPeriod.end);
+                                    return formatDateRange(displayPeriod.start, displayPeriod.end);
                                 })()}
                             </div>
                             <div className="text-md font-semibold mb-2">
-                                {payPeriod.all_hours.toFixed(1).padStart(4, ' ')} -
-                                ${payPeriod.gross.toFixed(2).padStart(6, ' ')}
+                                {displayPeriod.all_hours.toFixed(1).padStart(4, ' ')} -
+                                ${displayPeriod.gross.toFixed(2).padStart(6, ' ')}
                             </div>
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <div>F: {payPeriod.flight_hours.toFixed(1)}</div>
-                                    <div>G: {payPeriod.ground_hours.toFixed(1)}</div>
+                                    <div>F: {displayPeriod.flight_hours.toFixed(1)}</div>
+                                    <div>G: {displayPeriod.ground_hours.toFixed(1)}</div>
                                 </div>
                                 <div>
-                                    <div>S: {payPeriod.sim_hours.toFixed(1)}</div>
-                                    <div>A: {payPeriod.admin_hours.toFixed(1)}</div>
+                                    <div>S: {displayPeriod.sim_hours.toFixed(1)}</div>
+                                    <div>A: {displayPeriod.admin_hours.toFixed(1)}</div>
                                 </div>
                             </div>
-                            {payPeriod.remaining > 0 && (
+                            {displayPeriod.remaining > 0 && (
                                 <div className="text-xs text-muted-foreground mt-2">
-                                    Remaining: {payPeriod.remaining.toFixed(1)}h
+                                    Remaining: {displayPeriod.remaining.toFixed(1)}h
                                 </div>
                             )}
                         </div>

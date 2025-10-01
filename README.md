@@ -1,27 +1,40 @@
 # Pay Logging Site
 
-This is 100% amateur hour so expect a big ole filetree filled with spaghetti
+> *This is 100% amateur hour so expect a big ole filetree filled with spaghetti*  
+> <sub>...but hey, it's running and doing the job I want it to</sub>
 
-<sub>but hey, it's running and doing the job I want it to</sub>
+## Tech Stack
 
-**Frontend:** React + TSX using Shadcn components and a robbed colortheme
+- **Frontend:** React + TypeScript + Vite
+  - UI: Shadcn components with custom theme
+  - Styling: Tailwind CSS
+  
+- **Backend:** Go
+  - Database: SQLite
+  - Authentication: Session-based with cookies (rev 1)
+  
+- **Deployment:** Self-hosted
+  - Dev: Vite dev server → nginx proxy
+  - Prod: Go static server (planned)
 
-**Backend:** Go with a very novice understanding of HTTP serving
+---
 
-Selfhosted, Go will eventually spit out the Frontend in prod for me. For now, it's Vite in a tmux session piped to nginx.
+## Roadmap
 
-## Goals
 ### Immediate
-- [ ] Update totals display with changing pay period selection
+- [x] ~~Update totals display with changing pay period selection~~
+  - *Partial: hour breakdown pending*
 - [ ] Flush form after submit/update actions
-- [ ] Privacy mode for screenshots (to blank customer names)
+- [ ] Privacy mode for screenshots (blank customer names)
 
 ### Near Term
-- [ ] Popup/interactive inset for editing entries
-- [ ] Pay validation features (also interactive? green/red pay comparison, data tracking)
-- [ ] Update admin section to use minutes and align with new timetracking software at work
+- [ ] Popup/interactive modal for editing entries
+- [ ] Pay validation features
+  - Green/red pay comparison
+  - Actual vs. expected tracking
+- [ ] Admin time tracking: switch to minutes for work software alignment
 
 ### Long Term
-1. Graphical data (shadcn `charts`, perhaps)
-2. localstorage-saved options connected to config menu
-3. Reports/logs access via mobile/PC
+- [ ] Data visualizations (Shadcn charts)
+- [ ] LocalStorage-based user preferences + config menu
+- [ ] Mobile-optimized reports/logs view

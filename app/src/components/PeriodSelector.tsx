@@ -21,7 +21,7 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         const hours = period.total_hours.toFixed(1);
         const gross = period.gross_earnings.toFixed(2);
 
-        return `${dayNum}${monthStr}${yearStr}/${hours}/$${gross}`;
+        return `${dayNum}${monthStr}${yearStr} (${hours}/$${gross})`;
     };
 
     const today = new Date();

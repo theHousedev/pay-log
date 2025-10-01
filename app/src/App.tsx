@@ -44,7 +44,6 @@ function App() {
     if (periodID) {
       const period = allPeriods.find(p => p.id === periodID);
       if (period) {
-        // Fetch entries for this period's date range
         fetchEntries('period', period.start);
         fetchViewTotals('period', period.start);
       }
@@ -53,6 +52,8 @@ function App() {
       fetchViewTotals('period', '');
     }
   }
+
+  const selectedPeriod = allPeriods.find(p => p.id === selectedPeriodID);
 
   return (
     <BrowserRouter>
@@ -70,6 +71,7 @@ function App() {
               onViewChange={handleViewChange}
               allPeriods={allPeriods}
               selectedPeriodID={selectedPeriodID}
+              selectedPeriod={selectedPeriod ?? undefined}
               setSelectedPeriodID={handlePeriodSelect}
               entries={entries}
               entriesLoading={entriesLoading}
