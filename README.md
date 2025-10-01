@@ -5,7 +5,10 @@ This is 100% amateur hour so expect a big ole filetree filled with spaghetti
 but hey it's running and doing the job I want it to
 
 
-React + TSX using Shadcn components and a robbed colortheme
+Frontend: React + TSX using Shadcn components and a robbed colortheme
+Backend: Go with a very novice understanding of HTTP serving
+
+Selfhosted, Go will eventually spit out the Frontend in prod for me. For now, it's Vite in a tmux session piped to nginx.
 
 ## Goals
 ### Immediate
