@@ -7,7 +7,6 @@ import { useViewTotals } from "@/hooks/useViewTotals";
 import { entryService } from "@/services/entryService";
 import { useAuth } from "@/contexts/AuthContext";
 
-
 export const useEntryManager = (
     view: ViewType,
     entryData: Entry,
@@ -26,7 +25,7 @@ export const useEntryManager = (
             fetchEntries('period');
             refreshPayPeriod();
         }
-    }, [authLoading, isAuthenticated]);
+    }, [authLoading, isAuthenticated, fetchEntries, refreshPayPeriod]);
 
     const handleEditEntry = async (id: string) => {
         const entryToEdit = entries.find(entry => entry.id === id);
@@ -69,8 +68,8 @@ export const useEntryManager = (
             if (isEditMode && editingEntry) {
                 response = await entryService.updateEntry(cleanEntryData);
             } else {
-                const { id, ...entryDataWithoutId } = cleanEntryData;
-                response = await entryService.createEntry(entryDataWithoutId as Entry);
+                const { id, ...entryDataWithoutID } = cleanEntryData; // eslint-disable-line
+                response = await entryService.createEntry(entryDataWithoutID as Entry);
             }
 
             const result = response;

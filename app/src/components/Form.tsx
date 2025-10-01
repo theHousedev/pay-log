@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 
 // custom imports
-import type { Entry, EntryType, PayPeriod, ViewType, ViewTotals } from "@/types"
+import type { Entry, EntryType, PayPeriod, ViewType, ViewTotals, HistPayPeriod } from "@/types"
 import FormSelector from "@/components/FormSelector"
 import InputTypes from "@/components/inputTypes"
 import ViewSelector from "@/components/ViewSelector"
@@ -32,6 +32,9 @@ interface FormProps {
     onEditEntry: (id: string) => void;
     viewTotals: ViewTotals;
     isEditMode: boolean;
+    allPeriods?: HistPayPeriod[];
+    selectedPeriodID?: number | null;
+    setSelectedPeriodID?: (id: number | null) => void;
 }
 
 function MainForm({
@@ -49,6 +52,9 @@ function MainForm({
     onEditEntry,
     viewTotals,
     isEditMode,
+    allPeriods,
+    selectedPeriodID,
+    setSelectedPeriodID,
 }: FormProps) {
     const [selectedDate, setSelectedDate] = useState(() => {
         return new Date().toISOString().split('T')[0]
@@ -180,6 +186,9 @@ function MainForm({
                                 onViewChange={onViewChange}
                                 selectedDate={selectedDate}
                                 onDateChange={handleDateChange}
+                                allPeriods={allPeriods ?? []}
+                                selectedPeriodID={selectedPeriodID ?? null}
+                                setSelectedPeriodID={setSelectedPeriodID ?? (() => { })}
                             />
                         </div>
                         <EntriesTable

@@ -36,6 +36,15 @@ export interface PayPeriod {
     remaining: number
 }
 
+export interface HistPayPeriod {
+    id: number
+    start: string
+    end: string
+    status: string
+    total_hours: number
+    gross_earnings: number
+}
+
 export interface ViewTotals {
     flight_hours: number
     ground_hours: number

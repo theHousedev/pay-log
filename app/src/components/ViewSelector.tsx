@@ -1,19 +1,26 @@
 import { Button } from "@/components/ui/button"
 import DaySelector from "./DaySelector"
-import type { ViewType } from "@/types"
+import type { HistPayPeriod, ViewType } from "@/types"
+import { PeriodSelector } from "./PeriodSelector";
 
 interface ViewTypeProps {
     view: ViewType;
     onViewChange: (type: ViewType) => void;
     selectedDate?: string;
     onDateChange?: (date: string) => void;
+    allPeriods: HistPayPeriod[];
+    selectedPeriodID: number | null;
+    setSelectedPeriodID: (id: number | null) => void;
 }
 
 export default function ViewSelector({
     view,
     onViewChange,
     selectedDate,
-    onDateChange
+    onDateChange,
+    allPeriods,
+    selectedPeriodID,
+    setSelectedPeriodID
 }: ViewTypeProps) {
     return (
         <div className="space-y-2">
@@ -45,6 +52,7 @@ export default function ViewSelector({
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                     </Button>
                 ))}
+
                 {view === 'day' && selectedDate && onDateChange && (
                     <DaySelector
                         selectedDate={selectedDate}
@@ -52,6 +60,15 @@ export default function ViewSelector({
                     />
                 )}
             </div>
+            {view === 'period' && allPeriods && (
+                <div className="mt-2">
+                    <PeriodSelector
+                        allPeriods={allPeriods}
+                        selectedID={selectedPeriodID}
+                        setSelectedID={setSelectedPeriodID}
+                    />
+                </div>
+            )}
 
 
         </div>

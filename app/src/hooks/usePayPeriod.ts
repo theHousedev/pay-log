@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 
 import type { Entry, PayPeriod } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,12 +37,12 @@ export const usePayPeriod = () => {
         return cfiPay + adminPay;
     };
 
-    const refreshPayPeriod = async () => {
+    const refreshPayPeriod = useCallback(async () => {
         hasFetched.current = false;
         await fetchPayPeriod(true);
-    };
+    }, []); // eslint-disable-line
 
-    const fetchPayPeriod = async (forceRefresh = false) => {
+    const fetchPayPeriod = useCallback(async (forceRefresh = false) => {
         if (authLoading ||
             !isAuthenticated ||
             (hasFetched.current && !forceRefresh)) {
@@ -83,7 +83,13 @@ export const usePayPeriod = () => {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [authLoading, isAuthenticated, apiPath, hasFetched]);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchPayPeriod();
+        }
+    }, [isAuthenticated, fetchPayPeriod]);
 
     return { payPeriod, currentRates, fetchPayPeriod, calculateEntryValue, refreshPayPeriod, isLoading }
 }

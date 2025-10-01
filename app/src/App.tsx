@@ -6,6 +6,7 @@ import MainForm from '@/components/Form'
 import AuthGuard from '@/components/AuthGuard'
 import LoginForm from '@/components/LoginForm'
 import { usePayPeriod } from '@/hooks/usePayPeriod'
+import { useHistPeriod } from '@/hooks/useHistPeriod'
 import { useEntryForm } from '@/hooks/useEntryForm'
 import { useViewTotals } from '@/hooks/useViewTotals'
 import { useEntryManager } from '@/hooks/useEntryManager'
@@ -16,6 +17,7 @@ function App() {
   const { payPeriod, calculateEntryValue, refreshPayPeriod } = usePayPeriod();
   const { viewTotals, fetchViewTotals } = useViewTotals();
   const [view, setView] = useState<ViewType>('period');
+  const { allPeriods, selectedPeriodID, setSelectedPeriodID } = useHistPeriod();
   const {
     entryData,
     handleFieldChange,
@@ -37,6 +39,21 @@ function App() {
     fetchViewTotals(newView, date);
   }
 
+  const handlePeriodSelect = (periodID: number | null) => {
+    setSelectedPeriodID(periodID);
+    if (periodID) {
+      const period = allPeriods.find(p => p.id === periodID);
+      if (period) {
+        // Fetch entries for this period's date range
+        fetchEntries('period', period.start);
+        fetchViewTotals('period', period.start);
+      }
+    } else {
+      fetchEntries('period', '');
+      fetchViewTotals('period', '');
+    }
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -51,6 +68,9 @@ function App() {
               payPeriod={payPeriod}
               view={view}
               onViewChange={handleViewChange}
+              allPeriods={allPeriods}
+              selectedPeriodID={selectedPeriodID}
+              setSelectedPeriodID={handlePeriodSelect}
               entries={entries}
               entriesLoading={entriesLoading}
               onEditEntry={handleEditEntry}

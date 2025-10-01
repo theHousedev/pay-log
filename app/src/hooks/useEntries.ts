@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { getAPIPath } from '@/utils/backend';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Entry, ViewType } from '@/types';
@@ -9,7 +9,7 @@ export const useEntries = () => {
     const apiPath = getAPIPath();
     const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-    const fetchEntries = async (view: ViewType, date?: string) => {
+    const fetchEntries = useCallback(async (view: ViewType, date?: string) => {
         if (authLoading) {
             return;
         }
@@ -31,6 +31,6 @@ export const useEntries = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [authLoading, isAuthenticated, apiPath]);
     return { entries, isLoading, fetchEntries };
 }
