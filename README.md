@@ -24,7 +24,9 @@
 ### Immediate
 - [x] ~~Update totals display with changing pay period selection~~
   - *Partial: hour breakdown pending*
-- [ ] Flush form after submit/update actions
+- On submit or update:
+  - [ ] Flush form out to empty
+  - [ ] Refresh data display
 - [ ] Privacy mode for screenshots (blank customer names)
 
 ### Near Term
