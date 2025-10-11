@@ -37,11 +37,6 @@ export const usePayPeriod = () => {
         return cfiPay + adminPay;
     };
 
-    const refreshPayPeriod = useCallback(async () => {
-        hasFetched.current = false;
-        await fetchPayPeriod(true);
-    }, []); // eslint-disable-line
-
     const fetchPayPeriod = useCallback(async (forceRefresh = false) => {
         if (authLoading ||
             !isAuthenticated ||
@@ -83,7 +78,12 @@ export const usePayPeriod = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [authLoading, isAuthenticated, apiPath, hasFetched]);
+    }, [authLoading, isAuthenticated, apiPath]);
+
+    const refreshPayPeriod = useCallback(async () => {
+        hasFetched.current = false;
+        await fetchPayPeriod(true);
+    }, [fetchPayPeriod]); // eslint-disable-line
 
     useEffect(() => {
         if (isAuthenticated) {

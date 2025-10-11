@@ -40,7 +40,7 @@ export default function InputTypes({ entry, onFieldChange }: InputTypesProps) {
                         <Separator orientation="vertical" />
                         <div className="grid grid-cols-1 gap-2">
                             <Label htmlFor="customer" className="font-bold">Customer</Label>
-                            <Input id="customer" type="text"
+                            <Input id="customer" type="text" tabIndex={3}
                                 value={entry.customer ?? ''}
                                 onChange={(e) => onFieldChange('customer', e.target.value)}
                             />
@@ -72,7 +72,7 @@ export default function InputTypes({ entry, onFieldChange }: InputTypesProps) {
                         <Separator orientation="vertical" />
                         <div className="grid grid-cols-1 gap-2">
                             <Label htmlFor="customer" className="font-bold">Customer</Label>
-                            <Input id="customer" type="text"
+                            <Input id="customer" type="text" tabIndex={3}
                                 value={entry.customer ?? ''}
                                 onChange={(e) => onFieldChange('customer', e.target.value)}
                             />
@@ -86,7 +86,7 @@ export default function InputTypes({ entry, onFieldChange }: InputTypesProps) {
                     <div className="flex gap-2 mb-3">
                         <div className="grid grid-cols-1 gap-2" style={{ width: '15%' }}>
                             <Label htmlFor="ground-hours" className="font-bold">Ground</Label>
-                            <Input id="ground-hours" type="number" inputMode="decimal" tabIndex={2}
+                            <Input id="ground-hours" type="number" inputMode="decimal" tabIndex={1}
                                 min="0" step="0.1" placeholder="0.0"
                                 value={entry.ground_hours ?? ''}
                                 onChange={(e) => onFieldChange('ground_hours', e.target.value)}
@@ -95,7 +95,7 @@ export default function InputTypes({ entry, onFieldChange }: InputTypesProps) {
                         <Separator orientation="vertical" />
                         <div className="grid grid-cols-1 gap-2">
                             <Label htmlFor="customer" className="font-bold">Customer</Label>
-                            <Input id="customer" type="text"
+                            <Input id="customer" type="text" tabIndex={2}
                                 value={entry.customer ?? ''}
                                 onChange={(e) => onFieldChange('customer', e.target.value)}
                             />

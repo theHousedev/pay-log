@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
 import type { Entry, ViewType } from "@/types";
-import { useEntryForm } from "@/hooks/useEntryForm";
 import { useEntries } from "@/hooks/useEntries";
 import { useViewTotals } from "@/hooks/useViewTotals";
 import { entryService } from "@/services/entryService";
@@ -11,11 +10,10 @@ export const useEntryManager = (
     view: ViewType,
     entryData: Entry,
     setFormData: (data: Entry) => void,
-    refreshPayPeriod: () => Promise<void>) => {
+    refreshPayPeriod: () => Promise<void>,
+    resetEntryForm: (type: string) => void) => {
     const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
-
-    const { resetEntryForm } = useEntryForm();
     const { entries, fetchEntries, isLoading: entriesLoading } = useEntries();
     const { fetchViewTotals } = useViewTotals();
     const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -32,7 +30,7 @@ export const useEntryManager = (
         console.log('Editing entry:', entryToEdit);
         if (!entryToEdit) return;
 
-        resetEntryForm(entryData.type as string);
+        resetEntryForm(entryData.type);
         setEditingEntry(entryToEdit);
         setIsEditMode(true);
 
@@ -81,7 +79,7 @@ export const useEntryManager = (
 
                 setIsEditMode(false);
                 setEditingEntry(null);
-                resetEntryForm(entryData.type as string);
+                resetEntryForm(entryData.type);
             } else {
                 alert(result.message);
             }

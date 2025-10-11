@@ -22,7 +22,9 @@ function App() {
     entryData,
     handleFieldChange,
     handleFormChange,
-    setFormData } = useEntryForm();
+    setFormData,
+    resetEntryForm
+  } = useEntryForm();
   const {
     isEditMode,
     entries,
@@ -31,7 +33,7 @@ function App() {
     handleEditEntry,
     handleSubmitEntry,
     handleDeleteEntry
-  } = useEntryManager(view, entryData, setFormData, refreshPayPeriod);
+  } = useEntryManager(view, entryData, setFormData, refreshPayPeriod, resetEntryForm);
 
   const handleViewChange = (newView: ViewType, date?: string) => {
     setView(newView)
